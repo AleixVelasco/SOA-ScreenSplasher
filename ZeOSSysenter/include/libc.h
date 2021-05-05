@@ -28,4 +28,10 @@ int yield();
 
 int get_stats(int pid, struct stats *st);
 
+int create_screen();
+
+void close();
+
+int set_focus(int canal);
+
 #endif  /* __LIBC_H__ */

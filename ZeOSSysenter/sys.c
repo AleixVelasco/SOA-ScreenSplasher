@@ -236,3 +236,48 @@ int sys_get_stats(int pid, struct stats *st)
   }
   return -ESRCH; /*ESRCH */
 }
+
+extern int max_num_screens;
+
+int sys_create_screen()
+{
+	/*task_struct *p = current();
+	int c = p->screens;
+	if(c <= 10 && max_num_screens > 0) {
+		p->screens++;
+		max_num_screens--;
+		p->focus = c;
+		set_user_page_screen(p,c);
+		return c;
+	}*/
+	return -1;
+}
+
+int sys_close()
+{
+	/*task_struct *p = current();
+	int c = p->screens;
+	if(c > 1) {
+		p->screens--;
+		max_num_screens++;
+		del_user_page_screen(p,p->screens);
+		p->focus = (p->screens)-1;
+		return 0;
+	}*/
+	return -1;
+}
+
+int sys_getfocus()
+{
+	return current()->focus;
+}
+
+int sys_set_focus(int canal)
+{
+	/*task_struct *p = current();
+	if(canal >= 0 && canal <10 && canal < p->screens) {
+		p->focus = canal;
+		return p->focus;
+	}*/
+	return -1;
+}

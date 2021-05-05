@@ -100,3 +100,41 @@ ENTRY(get_stats)
 	popl %ebp
 	ret
 
+/* int create_screen() */
+ENTRY(create_screen)
+	pushl %ebp
+	movl %esp, %ebp
+	movl $25, %eax
+	call syscall_sysenter
+	popl %ebp
+	ret
+	js nok	// if (eax < 0) -->
+	popl %ebp
+	ret
+
+/* void close() */
+ENTRY(close)
+	pushl %ebp
+	movl %esp, %ebp
+	movl $26, %eax
+	call syscall_sysenter
+	popl %ebp
+	ret
+	js nok	// if (eax < 0) -->
+	popl %ebp
+	ret
+
+/* int set_focus(int canal) */
+ENTRY(set_focus)
+	pushl %ebp
+	movl %esp, %ebp
+	pushl %ebx;  // Save EBX, ESI and EDI if modified
+	movl $27, %eax
+	movl 0x8(%ebp), %ebx;	//canal
+	call syscall_sysenter
+	popl %ebp
+	ret
+	js nok	// if (eax < 0) -->
+	popl %ebp
+	ret
+
