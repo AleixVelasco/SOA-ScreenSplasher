@@ -237,15 +237,15 @@ int sys_get_stats(int pid, struct stats *st)
   return -ESRCH; /*ESRCH */
 }
 
-extern int max_num_screens;
+extern int files_opened;
 
 int sys_create_screen()
 {
 	/*task_struct *p = current();
 	int c = p->screens;
-	if(c <= 10 && max_num_screens > 0) {
+	if(c <= 10 && files_opened < 30) {
 		p->screens++;
-		max_num_screens--;
+
 		p->focus = c;
 		set_user_page_screen(p,c);
 		return c;

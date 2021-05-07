@@ -28,7 +28,9 @@ page_table_entry pagusr_table[NR_TASKS][TOTAL_PAGES]
 /* TSS */
 TSS         tss; 
 
-
+/* OPEN FILES TABLE */
+open_files_table_entry open_files_table[30];
+int files_opened = 0;
 
 /***********************************************/
 /************** PAGING MANAGEMENT **************/
@@ -254,6 +256,35 @@ void set_ss_pag(page_table_entry *PT, unsigned page,unsigned frame)
 	PT[page].bits.rw=1;
 	PT[page].bits.present=1;
 
+}
+
+open_files_table_entry * open_screen_page( struct task_struct *task )
+{
+		open_files_table[files_opened].entry = 0;
+		open_files_table[files_opened].bits.refs = 1;
+		open_files_table[files_opened].bits.rwpointer = 0;
+		open_files_table[files_opened].bits.color = 15;
+		open_files_table[files_opened].logicpage = set_user_screen_page(task);
+	files_opened++;
+
+	return (open_files_table_entry *) open_files_table[files_opened];
+}
+
+page_table_entry * set_user_screen_page( struct task_struct *task )
+{
+ int pag; 
+ int new_ph_pag;
+ page_table_entry * process_PT =  get_PT(task);
+ int num_screens = task->screens;
+
+	new_ph_pag=alloc_frame();
+  	process_PT[PAG_LOG_INIT_DATA+NUM_PAG_DATA+num_screens].entry = 0;
+  	process_PT[PAG_LOG_INIT_DATA+NUM_PAG_DATA+num_screens].bits.pbase_addr = new_ph_pag;
+  	process_PT[PAG_LOG_INIT_DATA+NUM_PAG_DATA+num_screens].bits.user = 0;
+  	process_PT[PAG_LOG_INIT_DATA+NUM_PAG_DATA+num_screens].bits.rw = 1;
+  	process_PT[PAG_LOG_INIT_DATA+NUM_PAG_DATA+num_screens].bits.present = 1;
+
+	return (page_table_entry *)process_PT[PAG_LOG_INIT_DATA+NUM_PAG_DATA+num_screens];
 }
 
 /* del_ss_pag - Removes mapping from logical page 'logical_page' */

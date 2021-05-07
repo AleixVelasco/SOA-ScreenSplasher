@@ -203,6 +203,11 @@ void init_task1(void)
 
   set_user_pages(c);
 
+	for (i=0; i<10; i++)
+  {
+    c->channel_table[i] = NULL;
+  }
+
   tss.esp0=(DWord)&(uc->stack[KERNEL_STACK_SIZE]);
   setMSR(0x175, 0, (unsigned long)&(uc->stack[KERNEL_STACK_SIZE]));
 

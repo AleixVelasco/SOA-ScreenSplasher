@@ -151,5 +151,17 @@ typedef union
   } bits;
 } page_table_entry;
 
+struct {
+	typedef union 
+	{
+		unsigned int entry;
+		struct {    
+			unsigned int refs  : 12;
+			unsigned int rwpointer  : 12;
+			unsigned int color  : 8;
+		} bits;
+	}
+	unsigned int logicpage;
+} open_files_table_entry;
 
 #endif  /* __TYPES_H__ */

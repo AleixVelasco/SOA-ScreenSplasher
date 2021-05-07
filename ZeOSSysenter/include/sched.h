@@ -26,6 +26,7 @@ struct task_struct {
   struct stats p_stats;		/* Process stats */
 	int screens; /* Number of Screens */
 	int foco; /* Current Screen */
+	open_files_table_entry *channel_table[10]; /* */
 };
 
 union task_union {
