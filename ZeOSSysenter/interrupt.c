@@ -66,7 +66,7 @@ void keyboard_routine()
  
   //Si la tecla pulsada es tab y shift ya ha sido pulsado, cambia foco
   else if (c&0x80 && (c&0x7f) == 0x0f and shift_pulsat == 1){
-  current()->foco = foco+1 % screens;
+  current()->foco = foco+1 % current()->screens;
   }
   //Si la tecla pulsada no es tab, comprueba que es shift
   else if (c&0x80 && (c&0x7f) == 0x2a) shift_pulsat = 1;
