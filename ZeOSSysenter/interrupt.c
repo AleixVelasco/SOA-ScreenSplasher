@@ -13,6 +13,7 @@
 
 Gate idt[IDT_ENTRIES];
 Register    idtR;
+unsigned int shift_pulsat = 0;
 
 char char_map[] =
 {
@@ -38,16 +39,39 @@ void clock_routine()
   zeos_show_clock();
   zeos_ticks ++;
   
+  //Borrar pantalla actual
+
+  //Cojer contenido del foco actual y pasarlo a un buffer
+  //int contenido_total_escrito = filas de rwpointer * columnas de rwpointer
+  //int buffer[contenido_total_escrito];
+  copy_data(void*)((current()->channel_table[focus}->logicpage)<<12), (void*)buffer, contenido_total_escrito);
+
+  //Pintarlo por pantalla con el color actual
+  for(int i = 0; i<current()->channel_table[focus]->bits.rwpointer; ++i){
+    //void printc_xy(Byte mx, Byte my, char c)
+  }
+
   schedule();
 }
 
 void keyboard_routine()
 {
+  //0x0f <- tab
+  //0x2a <- L_shift
+
   unsigned char c = inb(0x60);
+
+  //Si se despulsa shift desmarcalo
+  if(c&0x80 == 0 && (c&0x7f) == 0x2a) shift_pulsat == 0;
+ 
+  //Si la tecla pulsada es tab y shift ya ha sido pulsado, cambia foco
+  else if (c&0x80 && (c&0x7f) == 0x0f and shift_pulsat == 1){
+  current()->foco = foco+1 % screens;
+  }
+  //Si la tecla pulsada no es tab, comprueba que es shift
+  else if (c&0x80 && (c&0x7f) == 0x2a) shift_pulsat = 1;
   
-  if (c&0x80 && (c&0x7f) == 0x2a && ){
-  
-  else
+
   
 }
 
