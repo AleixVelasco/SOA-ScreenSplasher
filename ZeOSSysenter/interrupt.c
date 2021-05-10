@@ -41,7 +41,7 @@ void clock_routine()
   
   //Borrar pantalla actual
 
-  //Cojer contenido del foco actual y pasarlo a un buffer
+  //Coger contenido del foco actual y pasarlo a un buffer
   //int contenido_total_escrito = filas de rwpointer * columnas de rwpointer
   //int buffer[contenido_total_escrito];
   copy_data(void*)((current()->channel_table[focus}->logicpage)<<12), (void*)buffer, contenido_total_escrito);
