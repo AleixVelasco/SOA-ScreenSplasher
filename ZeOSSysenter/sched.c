@@ -172,6 +172,15 @@ void init_idle (void)
 
   allocate_DIR(c);
 
+	for (i=0; i<10; i++)
+  {
+    c->channel_table[i] = NULL;
+  }
+	
+	c->channel_table[0] = open_screen_page( c );
+	c->screens = 1;	
+	c->foco = 0;
+
   uc->stack[KERNEL_STACK_SIZE-1]=(unsigned long)&cpu_idle; /* Return address */
   uc->stack[KERNEL_STACK_SIZE-2]=0; /* register ebp */
 
@@ -207,6 +216,10 @@ void init_task1(void)
   {
     c->channel_table[i] = NULL;
   }
+	
+	c->channel_table[0] = open_screen_page( c );
+	c->screens = 1;	
+	c->foco = 0;
 
   tss.esp0=(DWord)&(uc->stack[KERNEL_STACK_SIZE]);
   setMSR(0x175, 0, (unsigned long)&(uc->stack[KERNEL_STACK_SIZE]));
