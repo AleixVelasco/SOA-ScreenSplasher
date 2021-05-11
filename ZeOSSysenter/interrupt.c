@@ -39,15 +39,20 @@ void clock_routine()
   zeos_show_clock();
   zeos_ticks ++;
   
-  //Borrar pantalla actual
+  //Borrar pantalla actual?
 
   //Coger contenido del foco actual y pasarlo a un buffer
-  //int contenido_total_escrito = filas de rwpointer * columnas de rwpointer
-  //int buffer[contenido_total_escrito];
-  copy_data(void*)((current()->channel_table[focus}->logicpage)<<12), (void*)buffer, contenido_total_escrito);
+  //Caracteres totales = filas_rwpointer * columnas_totales + columnas_rwpointer
+  int columnas_rwpointer = (int)((current()->channel_table[current()->focus]->rwpointer)>>5)
+  int filas_rwpointer = (int)((current()->channel_table[current()->focus]->rwpointer)&0x05)
+  
+  int caracteres_totales = filas_rwpointer * 25 + columnas_rwpointer
+  int buffer[caracteres_totales];
+
+  copy_data((void*)((current()->channel_table[focus}->logicpage)<<12), (void*)buffer, caracteres_totales);
 
   //Pintarlo por pantalla con el color actual
-  for(int i = 0; i<current()->channel_table[focus]->bits.rwpointer; ++i){
+  for(int i = 0; i<caracteres_totales; ++i){
     //void printc_xy(Byte mx, Byte my, char c)
   }
 

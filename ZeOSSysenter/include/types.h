@@ -157,7 +157,8 @@ struct {
 		unsigned int entry;
 		struct {    
 			unsigned int refs  : 12;
-			unsigned int rwpointer  : 12;
+			// 7 bits for NUM_COLUMNS and 5 bits for NUM_ROWS
+			unsigned int rwpointer  : 12; 
 			unsigned int color  : 8;
 		} bits;
 	}
