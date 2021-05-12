@@ -46,16 +46,21 @@ void clock_routine()
   int columnas_rwpointer = (int)((current()->channel_table[current()->focus]->rwpointer)>>5)
   int filas_rwpointer = (int)((current()->channel_table[current()->focus]->rwpointer)&0x05)
   
-  int caracteres_totales = filas_rwpointer * 25 + columnas_rwpointer
+  int caracteres_totales = filas_rwpointer * 80 + columnas_rwpointer
   int buffer[caracteres_totales];
 
   copy_data((void*)((current()->channel_table[focus}->logicpage)<<12), (void*)buffer, caracteres_totales);
 
-  //Pintarlo por pantalla con el color actual
-  for(int i = 0; i<caracteres_totales; ++i){
-    //void printc_xy(Byte mx, Byte my, char c)
+  //Pintarlo por pantalla con el color según los codigos de escape, el write se encargara de mover el cursor y borrar caracteres y clock_routine de pintarlos detectados de los codigos de escape.
+
+  Byte color = current()->channel_table[current()->focus]->color;
+
+  for(int i = 0; i < caracteres_totales; ++i){
+
+      printc_xy(0, 0, buffer[i], color);
   }
 
+       
   schedule();
 }
 
