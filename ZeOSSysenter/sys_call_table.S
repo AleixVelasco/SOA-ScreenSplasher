@@ -29,7 +29,7 @@ ENTRY (sys_call_table)
 	.long sys_ni_syscall	//24
 	.long sys_create_screen	//25
 	.long sys_close	//26
-	.long sys_set_focus	//27
+	.long sys_setFocus	//27
 	.long sys_ni_syscall	//28
 	.long sys_ni_syscall	//29
 	.long sys_ni_syscall	//30

@@ -32,6 +32,6 @@ int create_screen();
 
 void close();
 
-int set_focus(int canal);
+int setFocus(int canal);
 
 #endif  /* __LIBC_H__ */

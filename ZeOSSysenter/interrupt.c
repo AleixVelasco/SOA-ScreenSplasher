@@ -49,7 +49,7 @@ void clock_routine()
   int caracteres_totales = filas_rwpointer * 80 + columnas_rwpointer
   int buffer[caracteres_totales];
 
-  copy_data((void*)((current()->channel_table[focus}->logicpage)<<12), (void*)buffer, caracteres_totales);
+  copy_data((void*)((current()->channel_table[focus]->logicpage)<<12), (void*)buffer, caracteres_totales);
 
   //Pintarlo por pantalla con el color según los codigos de escape, el write se encargara de mover el cursor y borrar caracteres y clock_routine de pintarlos detectados de los codigos de escape.
 

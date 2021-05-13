@@ -293,6 +293,7 @@ void del_ss_pag(page_table_entry *PT, unsigned logical_page)
   PT[logical_page].entry=0;
 }
 
+
 /* get_frame - Returns the physical frame associated to page 'logical_page' */
 unsigned int get_frame (page_table_entry *PT, unsigned int logical_page){
      return PT[logical_page].bits.pbase_addr; 
