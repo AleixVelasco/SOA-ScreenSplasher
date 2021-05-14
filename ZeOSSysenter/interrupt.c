@@ -43,17 +43,17 @@ void clock_routine()
 
   //Coger contenido del foco actual y pasarlo a un buffer
   //Caracteres totales = filas_rwpointer * columnas_totales + columnas_rwpointer
-  int columnas_rwpointer = (int)((current()->channel_table[current()->focus]->rwpointer)>>5)
-  int filas_rwpointer = (int)((current()->channel_table[current()->focus]->rwpointer)&0x05)
+  int columnas_rwpointer = (int)((current()->channel_table[current()->foco]->bits.rwpointer)>>5);
+  int filas_rwpointer = (int)((current()->channel_table[current()->foco]->bits.rwpointer)&0x05);
   
-  int caracteres_totales = filas_rwpointer * 80 + columnas_rwpointer
+  int caracteres_totales = filas_rwpointer * 80 + columnas_rwpointer;
   int buffer[caracteres_totales];
 
-  copy_data((void*)((current()->channel_table[focus]->logicpage)<<12), (void*)buffer, caracteres_totales);
+  copy_data((void*)(((int)(current()->channel_table[current()->foco]->logicpage))<<12), &buffer, caracteres_totales);
 
   //Pintarlo por pantalla con el color según los codigos de escape, el write se encargara de mover el cursor y borrar caracteres y clock_routine de pintarlos detectados de los codigos de escape.
 
-  Byte color = current()->channel_table[current()->focus]->color;
+  Byte color = current()->channel_table[current()->foco]->bits.color;
 
   for(int i = 0; i < caracteres_totales; ++i){
 
@@ -75,8 +75,8 @@ void keyboard_routine()
   if(c&0x80 == 0 && (c&0x7f) == 0x2a) shift_pulsat == 0;
  
   //Si la tecla pulsada es tab y shift ya ha sido pulsado, cambia foco
-  else if (c&0x80 && (c&0x7f) == 0x0f and shift_pulsat == 1){
-  current()->foco = foco+1 % current()->screens;
+  else if (c&0x80 && (c&0x7f) == 0x0f && shift_pulsat == 1){
+  current()->foco = (current()->foco)+1 % current()->screens;
   }
   //Si la tecla pulsada no es tab, comprueba que es shift
   else if (c&0x80 && (c&0x7f) == 0x2a) shift_pulsat = 1;

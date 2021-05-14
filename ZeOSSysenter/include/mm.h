@@ -37,6 +37,8 @@ void setTSS();
 
 void set_ss_pag(page_table_entry *PT, unsigned page,unsigned frame);
 void del_ss_pag(page_table_entry *PT, unsigned page);
+page_table_entry * set_user_screen_page( struct task_struct *task );
+open_files_table_entry * open_screen_page( struct task_struct *task);
 unsigned int get_frame(page_table_entry *PT, unsigned int page);
 
 #endif  /* __MM_H__ */

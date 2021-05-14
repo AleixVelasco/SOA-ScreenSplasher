@@ -68,5 +68,5 @@ void printk(char *string)
 {
   int i;
   for (i = 0; string[i]; i++)
-    printc(string[i]);
+    printc(string[i], 0x02);
 }

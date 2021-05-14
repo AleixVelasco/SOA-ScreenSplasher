@@ -151,18 +151,16 @@ typedef union
   } bits;
 } page_table_entry;
 
-struct {
-	typedef union 
-	{
-		unsigned int entry;
-		struct {    
-			unsigned int refs  : 12;
-			/*7 bits for NUM_COLUMNS and 5 bits for NUM_ROWS */
-			unsigned int rwpointer  : 12; 
-			unsigned int color  : 8;
-		} bits;
-	}
-	unsigned int logicpage;
+typedef union
+{
+ unsigned int entry;
+ struct {    
+	unsigned int refs  : 12;
+	/*7 bits for NUM_COLUMNS and 5 bits for NUM_ROWS */
+	unsigned int rwpointer  : 12; 
+	unsigned int color  : 8;
+ }bits;
+ page_table_entry* logicpage;
 } open_files_table_entry;
 
 #endif  /* __TYPES_H__ */

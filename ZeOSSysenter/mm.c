@@ -268,18 +268,6 @@ void set_ss_screen_pag(page_table_entry *PT, unsigned page,unsigned frame)
 
 }
 
-open_files_table_entry * open_screen_page( struct task_struct *task )
-{
-		open_files_table[files_opened].entry = 0;
-		open_files_table[files_opened].bits.refs = 1;
-		open_files_table[files_opened].bits.rwpointer = 0;
-		open_files_table[files_opened].bits.color = 15;
-		open_files_table[files_opened].logicpage = set_user_screen_page(task);
-	files_opened++;
-
-	return (open_files_table_entry *) open_files_table[files_opened];
-}
-
 page_table_entry * set_user_screen_page( struct task_struct *task )
 {
  int pag; 
@@ -294,8 +282,21 @@ page_table_entry * set_user_screen_page( struct task_struct *task )
   	process_PT[PAG_LOG_INIT_DATA+NUM_PAG_DATA+num_screens].bits.rw = 1;
   	process_PT[PAG_LOG_INIT_DATA+NUM_PAG_DATA+num_screens].bits.present = 1;
 
-	return (page_table_entry *)process_PT[PAG_LOG_INIT_DATA+NUM_PAG_DATA+num_screens];
+	return &process_PT[PAG_LOG_INIT_DATA+NUM_PAG_DATA+num_screens];
 }
+
+open_files_table_entry * open_screen_page( struct task_struct *task)
+{
+		open_files_table[files_opened].entry = 0;
+		open_files_table[files_opened].bits.refs = 1;
+		open_files_table[files_opened].bits.rwpointer = 0;
+		open_files_table[files_opened].bits.color = 15;
+		open_files_table[files_opened].logicpage = set_user_screen_page(task);
+	files_opened++;
+
+	return &open_files_table[files_opened];
+}
+
 
 /* del_ss_pag - Removes mapping from logical page 'logical_page' */
 void del_ss_pag(page_table_entry *PT, unsigned logical_page)

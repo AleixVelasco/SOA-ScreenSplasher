@@ -22,6 +22,8 @@
 
 void * get_ebp();
 
+extern int max_num_screens;
+
 int check_fd(int fd, int permissions)
 {
   if (fd!=1) return -EBADF; 
@@ -77,7 +79,7 @@ int sys_fork(void)
 	for (int i=0; i<10; i++)
   {
     if(current()->channel_table[i] != NULL) {
-			*(current()->channel_table[i]).entry++;
+			current()->channel_table[i]->entry++;
 		}
   }
 
@@ -285,12 +287,12 @@ extern int files_opened;
 
 int sys_create_screen()
 {
-	task_struct *p = current();
+	struct task_struct *p = current();
 	int c = p->screens;
 	if(c <= 10 && files_opened < 30) {
 		p->channel_table[c] = open_screen_page( p );
 		if(p->channel_table[c] != NULL) {
-			p->focus = c;
+			p->foco = c;
 			p->screens++;
 			return c;
 		}
@@ -300,7 +302,7 @@ int sys_create_screen()
 
 int sys_close()
 {
-	task_struct *p = current();
+	struct task_struct *p = current();
         page_table_entry *process_PT = get_PT(current());
 	int c = p->screens;
 	if(c > 1) {
@@ -310,27 +312,27 @@ int sys_close()
 		//del_user_page_screen(p,p->screens); usar?
 
 		//Eliminar de la tabla pantallas y si se queda sin referencias quitarlo todo
-                p->channel_table[p->focus]->refs = (p->channel_table[p->focus]->bits.refs) - 1;
+                p->channel_table[p->foco]->bits.refs = (p->channel_table[p->foco]->bits.refs); - 1;
 
-                if (p->channel_table[p->focus]->bits.refs == 0){
-                   p->channel_table[p->focus].entry = 0;
-		   p->channel_table[p->focus].bits.refs = 0;
-		   p->channel_table[p->focus].bits.rwpointer = 0;
-		   p->channel_table[p->focus].bits.color = 0;
+                if (p->channel_table[p->foco]->bits.refs == 0){
+                   p->channel_table[p->foco]->entry = 0;
+		   p->channel_table[p->foco]->bits.refs = 0;
+		   p->channel_table[p->foco]->bits.rwpointer = 0;
+		   p->channel_table[p->foco]->bits.color = 0;
 
 		   /* Deallocate allocated pages. Delete reserved pages. */
-                   free_frame(get_frame(process_PT, p->channel_table[p->focus]->logicpage);
-                   del_ss_pag(process_PT, p->channel_table[p->focus]->logicpage);
+                   free_frame(get_frame(process_PT, (unsigned int)(p->channel_table[p->foco]->logicpage)));
+                   del_ss_pag(process_PT, p->channel_table[p->foco]->logicpage);
 
-		   p->channel_table[p->focus].logicpage = NULL;
+		   p->channel_table[p->foco]->logicpage = NULL;
 
 	           files_opened--;
       
                 }
 
 		//Eliminar de la tabla de canales y cambiar foco
-                p->channel_table[p->focus] = NULL;
-		p->focus = (p->screens)-1;
+                p->channel_table[p->foco] = NULL;
+		p->foco = (p->screens)-1;
 		return 0;
 	}
 	return -1;
@@ -338,14 +340,14 @@ int sys_close()
 
 int sys_getfocus(int focus)
 {
-	return current()->focus;
+	return current()->foco;
 }
 
 int sys_setFocus(int canal)
 {
-	task_struct *p = current();
+	struct task_struct *p = current();
 	if(canal >= 0 && canal <10 && canal < p->screens) {
-		p->focus = canal;
+		p->foco = canal;
 		return 0;
 	}
 	return -1;
