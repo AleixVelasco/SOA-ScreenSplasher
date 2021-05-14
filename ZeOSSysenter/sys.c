@@ -24,8 +24,7 @@ void * get_ebp();
 
 int check_fd(int fd, int permissions)
 {
-  //if (fd!=1) return -EBADF; 
-	if (fd<0 && fd>=current()->screens) return -EBADF; 
+  if (fd!=1) return -EBADF; 
   if (permissions!=ESCRIPTURA) return -EACCES; 
   return 0;
 }
@@ -209,9 +208,7 @@ int ret;
 	if (!access_ok(VERIFY_READ, buffer, nbytes))
 		return -EFAULT;
 	
-	//*(current()->channel_table[fd]).logicpage;
-
-	/*bytes_left = nbytes;
+	bytes_left = nbytes;
 	while (bytes_left > TAM_BUFFER) {
 		copy_from_user(buffer, localbuffer, TAM_BUFFER);
 		ret = sys_write_console(localbuffer, TAM_BUFFER);
@@ -223,7 +220,7 @@ int ret;
 		ret = sys_write_console(localbuffer, bytes_left);
 		bytes_left-=ret;
 	}
-	return (nbytes-bytes_left);*/
+	return (nbytes-bytes_left);
 }
 
 
