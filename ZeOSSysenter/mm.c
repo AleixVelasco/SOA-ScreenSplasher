@@ -269,8 +269,7 @@ void set_ss_screen_pag(page_table_entry *PT, unsigned page,unsigned frame)
 }
 
 page_table_entry * set_user_screen_page( struct task_struct *task )
-{
- int pag; 
+{ 
  int new_ph_pag;
  page_table_entry * process_PT =  get_PT(task);
  int num_screens = task->screens;
@@ -287,10 +286,10 @@ page_table_entry * set_user_screen_page( struct task_struct *task )
 
 open_files_table_entry * open_screen_page( struct task_struct *task)
 {
-		open_files_table[files_opened].entry = 0;
-		open_files_table[files_opened].bits.refs = 1;
-		open_files_table[files_opened].bits.rwpointer = 0;
-		open_files_table[files_opened].bits.color = 15;
+		open_files_table[files_opened].content.entry = 0;
+		open_files_table[files_opened].content.bits.refs = 1;
+		open_files_table[files_opened].content.bits.rwpointer = 0;
+		open_files_table[files_opened].content.bits.color = 15;
 		open_files_table[files_opened].logicpage = set_user_screen_page(task);
 	files_opened++;
 

@@ -22,8 +22,6 @@
 
 void * get_ebp();
 
-extern int max_num_screens;
-
 int check_fd(int fd, int permissions)
 {
   if (fd!=1) return -EBADF; 
@@ -307,7 +305,6 @@ int sys_close()
 	int c = p->screens;
 	if(c > 1) {
 		p->screens--;
-		max_num_screens++;
 
 		//del_user_page_screen(p,p->screens); usar?
 
