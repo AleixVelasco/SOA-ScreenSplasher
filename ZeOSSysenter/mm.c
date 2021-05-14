@@ -258,6 +258,16 @@ void set_ss_pag(page_table_entry *PT, unsigned page,unsigned frame)
 
 }
 
+void set_ss_screen_pag(page_table_entry *PT, unsigned page,unsigned frame)
+{
+	PT[page].entry=0;
+	PT[page].bits.pbase_addr=frame;
+	PT[page].bits.user=0;
+	PT[page].bits.rw=1;
+	PT[page].bits.present=1;
+
+}
+
 open_files_table_entry * open_screen_page( struct task_struct *task )
 {
 		open_files_table[files_opened].entry = 0;

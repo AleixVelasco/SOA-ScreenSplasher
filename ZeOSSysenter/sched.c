@@ -172,7 +172,7 @@ void init_idle (void)
 
   allocate_DIR(c);
 
-	for (i=0; i<10; i++)
+	for (int i=0; i<10; i++)
   {
     c->channel_table[i] = NULL;
   }
@@ -212,7 +212,7 @@ void init_task1(void)
 
   set_user_pages(c);
 
-	for (i=0; i<10; i++)
+	for (int i=0; i<10; i++)
   {
     c->channel_table[i] = NULL;
   }

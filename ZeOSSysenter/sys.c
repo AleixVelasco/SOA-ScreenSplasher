@@ -73,12 +73,21 @@ int sys_fork(void)
   /* Copy the parent's task struct to child's */
   copy_data(current(), uchild, sizeof(union task_union));
   
+	/* Inc the ref of the opened screens */
+	for (int i=0; i<10; i++)
+  {
+    if(current()->channel_table[i] != NULL) {
+			*(current()->channel_table[i]).entry++;
+		}
+  }
+
   /* new pages dir */
   allocate_DIR((struct task_struct*)uchild);
   
   /* Allocate pages for DATA+STACK */
   int new_ph_pag, pag, i;
   page_table_entry *process_PT = get_PT(&uchild->task);
+	
   for (pag=0; pag<NUM_PAG_DATA; pag++)
   {
     new_ph_pag=alloc_frame();
@@ -102,6 +111,32 @@ int sys_fork(void)
     }
   }
 
+	int screens = current()->screens;
+
+	for (pag=NUM_PAG_DATA; pag<NUM_PAG_DATA+screens; pag++)
+  {
+    new_ph_pag=alloc_frame();
+    if (new_ph_pag!=-1) /* One page allocated */
+    {
+      set_ss_screen_pag(process_PT, PAG_LOG_INIT_DATA+pag, new_ph_pag);
+    }
+    else /* No more free pages left. Deallocate everything */
+    {
+      /* Deallocate allocated pages. Up to pag. */
+      for (i=0; i<pag; i++)
+      {
+        free_frame(get_frame(process_PT, PAG_LOG_INIT_DATA+i));
+        del_ss_pag(process_PT, PAG_LOG_INIT_DATA+i);
+      }
+      /* Deallocate task_struct */
+      list_add_tail(lhcurrent, &freequeue);
+      
+      /* Return error */
+      return -EAGAIN; 
+    }
+  }
+
+
   /* Copy parent's SYSTEM and CODE to child. */
   page_table_entry *parent_PT = get_PT(current());
   for (pag=0; pag<NUM_PAG_KERNEL; pag++)
@@ -120,6 +155,15 @@ int sys_fork(void)
     copy_data((void*)(pag<<12), (void*)((pag+NUM_PAG_DATA)<<12), PAGE_SIZE);
     del_ss_pag(parent_PT, pag+NUM_PAG_DATA);
   }
+
+	for (pag=NUM_PAG_KERNEL+NUM_PAG_CODE+NUM_PAG_DATA; pag<NUM_PAG_KERNEL+NUM_PAG_CODE+NUM_PAG_DATA+screens; pag++)
+  {
+    /* Map one child page to parent's address space. */
+    set_ss_screen_pag(parent_PT, pag+NUM_PAG_DATA, get_frame(process_PT, pag));
+    copy_data((void*)(pag<<12), (void*)((pag+NUM_PAG_DATA)<<12), PAGE_SIZE);
+    del_ss_pag(parent_PT, pag+NUM_PAG_DATA);
+  }
+
   /* Deny access to the child's memory space */
   set_cr3(get_DIR(current()));
 
@@ -241,15 +285,16 @@ extern int files_opened;
 
 int sys_create_screen()
 {
-	/*task_struct *p = current();
+	task_struct *p = current();
 	int c = p->screens;
 	if(c <= 10 && files_opened < 30) {
-		p->screens++;
-
-		p->focus = c;
-		set_user_page_screen(p,c);
-		return c;
-	}*/
+		p->channel_table[c] = open_screen_page( p );
+		if(p->channel_table[c] != NULL) {
+			p->focus = c;
+			p->screens++;
+			return c;
+		}
+	}
 	return -1;
 }
 
