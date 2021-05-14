@@ -77,7 +77,7 @@ int sys_fork(void)
 	for (int i=0; i<10; i++)
   {
     if(current()->channel_table[i] != NULL) {
-			current()->channel_table[i]->entry++;
+			current()->channel_table[i]->content.bits.refs++;
 		}
   }
 
@@ -309,17 +309,17 @@ int sys_close()
 		//del_user_page_screen(p,p->screens); usar?
 
 		//Eliminar de la tabla pantallas y si se queda sin referencias quitarlo todo
-                p->channel_table[p->foco]->bits.refs = (p->channel_table[p->foco]->bits.refs); - 1;
+                p->channel_table[p->foco]->content.bits.refs = (p->channel_table[p->foco]->content.bits.refs) - 1;
 
-                if (p->channel_table[p->foco]->bits.refs == 0){
-                   p->channel_table[p->foco]->entry = 0;
-		   p->channel_table[p->foco]->bits.refs = 0;
-		   p->channel_table[p->foco]->bits.rwpointer = 0;
-		   p->channel_table[p->foco]->bits.color = 0;
+                if (p->channel_table[p->foco]->content.bits.refs == 0){
+                   p->channel_table[p->foco]->content.entry = 0;
+		   p->channel_table[p->foco]->content.bits.refs = 0;
+		   p->channel_table[p->foco]->content.bits.rwpointer = 0;
+		   p->channel_table[p->foco]->content.bits.color = 0;
 
 		   /* Deallocate allocated pages. Delete reserved pages. */
                    free_frame(get_frame(process_PT, (unsigned int)(p->channel_table[p->foco]->logicpage)));
-                   del_ss_pag(process_PT, p->channel_table[p->foco]->logicpage);
+                   p->channel_table[p->foco]->logicpage->entry = 0;
 
 		   p->channel_table[p->foco]->logicpage = NULL;
 
