@@ -62,6 +62,39 @@ void clock_routine()
 
   copy_data((void*)((int)(current()->channel_table[current()->foco]->logicpage)<<12), buffer, caracteres_totales);
 
+  /* Prueba  */
+  /*
+   //De buffer->pagina de pantalla (color+caracter)
+   char buffp[40] = "Hello I am a multicolor operating system";
+   Word buf[40];
+  
+  for(int i = 0; i<40; ++i){ 
+   Byte col = i%4+1; //Colores random excepto el negro
+   char caracter = buffp[i]; 
+    
+   Word color_w = 0xFF00 & (col<<8);
+   Word total = (Word) (caracter & 0x00FF) | color_w;
+   
+   buf[i] = total;
+  }
+
+   copy_data((void*)&buf, (void*)(current()->channel_table[current()->foco]->logicpage<<12), 80); //Copy data va por bytes al ser un word se ha de pasar el doble
+
+  //De pagina de pantalla -> buffer
+  Word bufft[40]; 
+  copy_data((void*)(current()->channel_table[current()->foco]->logicpage<<12), (void*)&bufft, 80);
+
+  int pos = 0;
+  for(int i = 0; i < 40; i++){
+
+     Byte col = bufft[i]>>8;
+     char caracter = bufft[i];
+
+     printc_xy(i, 0, caracter, col);
+     ++pos;
+  }
+  */
+  /* Prueba */
 
   //Pintarlo por pantalla con el color según los codigos de escape, el write se encargara de mover el cursor y borrar caracteres y clock_routine de pintarlos detectados de los codigos de escape.
   
@@ -78,7 +111,6 @@ void clock_routine()
     print_xy(0,0, idProces[pos
   }
   */
-  
   Byte color = current()->channel_table[current()->foco]->content.bits.color;
   
   for(int i = 0; i < caracteres_totales; ++i){
