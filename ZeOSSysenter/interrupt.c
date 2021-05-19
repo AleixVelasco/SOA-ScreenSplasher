@@ -44,7 +44,6 @@ void clock_routine()
   if(zeos_ticks > 3){
 
   struct task_struct* p = current();
-  int ps = p->PID;
 
   int focoo = p->foco;
   open_files_table_entry* a = p->channel_table[focoo];
@@ -63,13 +62,28 @@ void clock_routine()
 
   copy_data((void*)((int)(current()->channel_table[current()->foco]->logicpage)<<12), buffer, caracteres_totales);
 
+
   //Pintarlo por pantalla con el color según los codigos de escape, el write se encargara de mover el cursor y borrar caracteres y clock_routine de pintarlos detectados de los codigos de escape.
+  
+  /*
+  //Identificador de la pantalla y el proceso actual
+  char idProces[2];
+  char idPantalla[2];
 
+  itoa(current()->PID, idProces);
+  itoa(current()->foco, idPantalla);
+ 
+  pos = 0;
+  while(pos<2){
+    print_xy(0,0, idProces[pos
+  }
+  */
+  
   Byte color = current()->channel_table[current()->foco]->content.bits.color;
-
+  
   for(int i = 0; i < caracteres_totales; ++i){
 
-      printc_xy(0, 0, buffer[i], color);
+      printc_xy(0, 1, buffer[i], color);
   }
 
   }
