@@ -30,6 +30,7 @@ TSS         tss;
 
 /* OPEN FILES TABLE */
 open_files_table_entry open_files_table[30];
+
 int files_opened = 0;
 
 /***********************************************/
@@ -268,8 +269,8 @@ void set_ss_screen_pag(page_table_entry *PT, unsigned page,unsigned frame)
 
 }
 
-page_table_entry * set_user_screen_page( struct task_struct *task )
-{ 
+int set_user_screen_page( struct task_struct *task )
+{
  int new_ph_pag;
  page_table_entry * process_PT =  get_PT(task);
  int num_screens = task->screens;
@@ -280,8 +281,8 @@ page_table_entry * set_user_screen_page( struct task_struct *task )
   	process_PT[PAG_LOG_INIT_DATA+NUM_PAG_DATA+num_screens].bits.user = 0;
   	process_PT[PAG_LOG_INIT_DATA+NUM_PAG_DATA+num_screens].bits.rw = 1;
   	process_PT[PAG_LOG_INIT_DATA+NUM_PAG_DATA+num_screens].bits.present = 1;
-
-	return &process_PT[PAG_LOG_INIT_DATA+NUM_PAG_DATA+num_screens];
+        
+	return (PAG_LOG_INIT_DATA+NUM_PAG_DATA+num_screens);
 }
 
 open_files_table_entry * open_screen_page( struct task_struct *task)
@@ -292,8 +293,9 @@ open_files_table_entry * open_screen_page( struct task_struct *task)
 		open_files_table[files_opened].content.bits.color = 15;
 		open_files_table[files_opened].logicpage = set_user_screen_page(task);
 	files_opened++;
-
-	return &open_files_table[files_opened];
+        
+        
+	return (open_files_table_entry *)&open_files_table[files_opened];
 }
 
 

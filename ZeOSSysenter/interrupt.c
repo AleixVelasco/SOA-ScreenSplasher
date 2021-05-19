@@ -16,6 +16,7 @@ Gate idt[IDT_ENTRIES];
 Register    idtR;
 unsigned int shift_pulsat = 0;
 
+
 char char_map[] =
 {
   '\0','\0','1','2','3','4','5','6',
@@ -40,8 +41,18 @@ void clock_routine()
   zeos_show_clock();
   zeos_ticks ++;
   
-  //Borrar pantalla actual?
+  if(zeos_ticks > 3){
 
+  struct task_struct* p = current();
+  int ps = p->PID;
+
+  int focoo = p->foco;
+  open_files_table_entry* a = p->channel_table[focoo];
+
+  int logic = a->logicpage;
+
+  //Borrar pantalla actual?
+  
   //Coger contenido del foco actual y pasarlo a un buffer
   //Caracteres totales = filas_rwpointer * columnas_totales + columnas_rwpointer
   int columnas_rwpointer = (int)((current()->channel_table[current()->foco]->content.bits.rwpointer)>>5);
@@ -61,7 +72,7 @@ void clock_routine()
       printc_xy(0, 0, buffer[i], color);
   }
 
-       
+  }
   schedule();
 }
 

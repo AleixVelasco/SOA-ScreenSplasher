@@ -162,9 +162,9 @@ typedef union
  }bits;
 } contents;
 
-typedef struct {
+typedef struct{
 	contents content;
-        page_table_entry* logicpage;
-} open_files_table_entry;
+        int logicpage;
+}open_files_table_entry;
 
 #endif  /* __TYPES_H__ */

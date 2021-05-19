@@ -111,9 +111,8 @@ int sys_fork(void)
     }
   }
 
-	int screens = current()->screens;
-
-	for (pag=NUM_PAG_DATA; pag<NUM_PAG_DATA+screens; pag++)
+  int screens = current()->screens;
+  for (pag=NUM_PAG_DATA; pag<NUM_PAG_DATA+screens; pag++)
   {
     new_ph_pag=alloc_frame();
     if (new_ph_pag!=-1) /* One page allocated */
@@ -298,8 +297,8 @@ int sys_create_screen()
 	return -1;
 }
 
-int sys_close()
-{
+int sys_close(){}
+/*
 	struct task_struct *p = current();
         page_table_entry *process_PT = get_PT(current());
 	int c = p->screens;
@@ -318,6 +317,9 @@ int sys_close()
 		   p->channel_table[p->foco]->content.bits.color = 0;
 
 		   /* Deallocate allocated pages. Delete reserved pages. */
+
+/*
+
                    free_frame(get_frame(process_PT, (unsigned int)(p->channel_table[p->foco]->logicpage)));
                    p->channel_table[p->foco]->logicpage->entry = 0;
 
@@ -334,6 +336,7 @@ int sys_close()
 	}
 	return -1;
 }
+*/
 
 int sys_getfocus(int focus)
 {
