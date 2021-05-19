@@ -111,6 +111,7 @@ void clock_routine()
     print_xy(0,0, idProces[pos
   }
   */
+
   Byte color = current()->channel_table[current()->foco]->content.bits.color;
   
   for(int i = 0; i < caracteres_totales; ++i){
