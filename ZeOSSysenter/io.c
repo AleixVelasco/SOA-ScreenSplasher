@@ -13,7 +13,7 @@
 #define NUM_COLUMNS 80
 #define NUM_ROWS    25
 
-Byte x, y=19;
+Byte x, y=0;
 
 /* Read a byte from 'port' */
 Byte inb (unsigned short port)
@@ -37,12 +37,11 @@ void printc(char c, Byte color_b)
     //Hace un AND de c para quedarse con el caracter y despues con la OR pone los 8 bits de major peso encima para indicar color
 
     Word color_w = 0xFF00 & (color_b<<8);
-
     Word ch = (Word) (c & 0x00FF) | color_w;
     DWord screen = 0xb8000 + (y * NUM_COLUMNS + x) * 2;
 
     //Si el caracter llena la columna se va a la siguinete fila
-    if (++x >= NUM_COLUMNS)
+    if (++x > NUM_COLUMNS)
     {
       x = 0;
       y=(y+1)%NUM_ROWS;

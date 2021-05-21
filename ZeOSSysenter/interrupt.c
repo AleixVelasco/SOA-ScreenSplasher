@@ -38,30 +38,11 @@ int zeos_ticks = 0;
 
 void clock_routine()
 {
-  zeos_show_clock();
+  //zeos_show_clock();
   zeos_ticks ++;
-  
+ 
+
   if(zeos_ticks > 3){
-
-  struct task_struct* p = current();
-
-  int focoo = p->foco;
-  open_files_table_entry* a = p->channel_table[focoo];
-
-  int logic = a->logicpage;
-
-  //Borrar pantalla actual?
-  
-  //Coger contenido del foco actual y pasarlo a un buffer
-  //Caracteres totales = filas_rwpointer * columnas_totales + columnas_rwpointer
-  int columnas_rwpointer = (int)((current()->channel_table[current()->foco]->content.bits.rwpointer)>>5);
-  int filas_rwpointer = (int)((current()->channel_table[current()->foco]->content.bits.rwpointer)&0x05);
-  
-  int caracteres_totales = filas_rwpointer * 80 + columnas_rwpointer;
-  int buffer[caracteres_totales];
-
-  copy_data((void*)((int)(current()->channel_table[current()->foco]->logicpage)<<12), buffer, caracteres_totales);
-
   /* Prueba  */
   /*
    //De buffer->pagina de pantalla (color+caracter)
@@ -93,34 +74,102 @@ void clock_routine()
      printc_xy(i, 0, caracter, col);
      ++pos;
   }
-  */
+   */
   /* Prueba */
 
-  //Pintarlo por pantalla con el color según los codigos de escape, el write se encargara de mover el cursor y borrar caracteres y clock_routine de pintarlos detectados de los codigos de escape.
-  
-  /*
-  //Identificador de la pantalla y el proceso actual
-  char idProces[2];
-  char idPantalla[2];
+  /* Pintamos identificador de la pantalla y el proceso actual */
+
+  char idProces[1];
+  char idPantalla[1];
 
   itoa(current()->PID, idProces);
   itoa(current()->foco, idPantalla);
  
-  pos = 0;
-  while(pos<2){
-    print_xy(0,0, idProces[pos
+  int pos = 0;
+  char buffer[8] = "Screen:";
+  for(int i = 0; buffer[i]; ++i){
+    printc_xy(pos,0, buffer[i],0x70);
+    pos++;
   }
-  */
+  printc_xy(pos,0, idPantalla[0],0x70);
+  pos++;
 
-  Byte color = current()->channel_table[current()->foco]->content.bits.color;
+  char buffer2[11] = " | Proces:";
+  for(int i = 0; buffer2[i]; ++i){
+    printc_xy(pos,0, buffer2[i],0x70);
+    pos++;
+  }
+  printc_xy(pos,0, idProces[0],0x70);
+  pos++;
   
-  for(int i = 0; i < caracteres_totales; ++i){
-
-      printc_xy(0, 1, buffer[i], color);
+  for(int i = pos; i < 80; i++){
+    printc_xy(i,0,' ',0x02);
   }
 
+
+   /* Prueba 
+
+   //De buffer->pagina de pantalla (color+caracter)
+
+   char buffp[500] = "Hello I am a multicolor operating system Hello I am a multicolor operating system Hello I am a multicolor operating system Hello I am a multicolor operating system Hello I am a multicolor operating system";
+   Word buf[500];
+  
+  for(int i = 0; i<500; ++i){ 
+   Byte col = i%4+1; //Colores random excepto el negro
+   char caracter = buffp[i]; 
+    
+   Word color_w = 0xFF00 & (col<<8);
+   Word total = (Word) (caracter & 0x00FF) | color_w;
+   
+   buf[i] = total;
   }
+  copy_data((void*)&buf, (void*)(current()->channel_table[current()->foco]->logicpage<<12), 1000); //Copy data va por bytes al ser un word se ha de pasar el doble
+  current()->channel_table[current()->foco]->content.bits.rwpointer = 0x005;
+   /* Prueba  */
+
+   //Clean pantalla/*
+   
+   /* Copiamos contenido extraido de la tabla de pantallas */
+
+  //Coger contenido del foco actual y pasarlo a un buffer
+  //Caracteres totales = filas_rwpointer * columnas_totales + columnas_rwpointer
+  
+  int columnas_rwpointer = (int)((current()->channel_table[current()->foco]->content.bits.rwpointer)>>5);
+  int filas_rwpointer = (int)((current()->channel_table[current()->foco]->content.bits.rwpointer)&0x05);
+  
+  int caracteres_totales = filas_rwpointer * 80 + columnas_rwpointer;
+  Word total_c[caracteres_totales];
+
+  copy_data((void*)((int)(current()->channel_table[current()->foco]->logicpage)<<12), total_c, caracteres_totales*2);
+
+  //Pintamos contenido
+  int y = 1;
+  int salt = 0;
+  for(int i = 0; i < 80*24; i++){
+     Byte col = total_c[i]>>8;
+     char caracter = total_c[i];
+     if(i<caracteres_totales){
+       col = total_c[i]>>8;
+       caracter = total_c[i];
+     }
+     else{
+       col = 0x02;
+       caracter = ' ';
+     }
+     if(salt == 80){
+        y++;
+        salt = 0;
+     }
+     printc_xy(i%80, y%25, caracter, col);
+     salt++;
+  }
+  
+  
+  
+  }
+  
   schedule();
+  
 }
 
 void keyboard_routine()

@@ -199,6 +199,10 @@ int sys_write(int fd, char *buffer, int nbytes) {
 char localbuffer [TAM_BUFFER];
 int bytes_left;
 int ret;
+int escapeCode = 0, changeColor = 0;
+char code[2];
+int pos = 0;
+Byte color;
 
 	if ((ret = check_fd(fd, ESCRIPTURA)))
 		return ret;
@@ -207,7 +211,49 @@ int ret;
 	if (!access_ok(VERIFY_READ, buffer, nbytes))
 		return -EFAULT;
 	
-	bytes_left = nbytes;
+  Word buff[nbytes];
+  color = current()->channel_table[fd]->content.bits.color;
+  for(int i = 0; i<nbytes; ++i){ 
+		if(escapeCode == 0) {
+				// Condición para detectar el carcter especial para indicar el inicio del escapeCode
+				if(buffer[i] == '[') {
+					escapeCode = 1;//printk(" Entra ");
+					pos = 0;
+				} else {
+					// Condición para cambiar de color si previamente ha habido un escapeCode
+					if(changeColor == 1) {
+						// Foreground coloring
+						if(code[0] == '3') {
+							color = (Byte) (color & 0xF0) | code[1];
+						} else if(code[0] == '4') {// Background coloring
+							color = (Byte) (color & 0x0F) | (code[1]<<8);
+						}
+						changeColor = 0;
+					}
+				 Word color_w = 0xFF00 & (color<<8);
+				 Word w = (Word) (buffer[i] & 0x00FF) | color_w;
+				 //char a = (char)buffer[i];
+				 //printc(a,0x02);
+				 buff[i] = w;
+				}
+		} else {
+			// Condición para detectar el carcter especial para indicar el final de escapeCode
+			if(buffer[i] == 'm') {
+				escapeCode = 0;
+				changeColor = 1;//printk(" Sale ");
+			} else {
+				// Condición para que no desborde  el buffer del code
+				if(pos <2){
+					code[pos] = buffer[i];
+					pos++;
+				}
+			}
+		}
+  }
+
+	copy_data((void*)&buff, (void*)(current()->channel_table[fd]->logicpage<<12), nbytes);
+
+	/*bytes_left = nbytes;
 	while (bytes_left > TAM_BUFFER) {
 		copy_from_user(buffer, localbuffer, TAM_BUFFER);
 		ret = sys_write_console(localbuffer, TAM_BUFFER);
@@ -219,7 +265,8 @@ int ret;
 		ret = sys_write_console(localbuffer, bytes_left);
 		bytes_left-=ret;
 	}
-	return (nbytes-bytes_left);
+	return (nbytes-bytes_left);*/
+	return 0;
 }
 
 
