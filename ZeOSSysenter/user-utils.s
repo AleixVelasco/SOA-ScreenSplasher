@@ -109,7 +109,7 @@ nok:
  ret
 
 
-.globl create_screen; .type create_screen, @function; .align 0; create_screen:
+.globl createScreen; .type createScreen, @function; .align 0; createScreen:
  pushl %ebp
  movl %esp, %ebp
  movl $25, %eax
@@ -133,7 +133,7 @@ nok:
  ret
 
 
-.globl set_focus; .type set_focus, @function; .align 0; set_focus:
+.globl setFocus; .type setFocus, @function; .align 0; setFocus:
  pushl %ebp
  movl %esp, %ebp
  pushl %ebx;

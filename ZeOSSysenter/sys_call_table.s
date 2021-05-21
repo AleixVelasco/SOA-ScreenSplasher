@@ -36,7 +36,7 @@
  .long sys_ni_syscall
  .long sys_ni_syscall
  .long sys_ni_syscall
- .long sys_create_screen
+ .long sys_createScreen
  .long sys_close
  .long sys_setFocus
  .long sys_ni_syscall

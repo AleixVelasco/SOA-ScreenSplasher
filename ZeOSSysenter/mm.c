@@ -289,7 +289,7 @@ open_files_table_entry * open_screen_page( struct task_struct *task)
 {
 		open_files_table[files_opened].content.entry = 0;
 		open_files_table[files_opened].content.bits.refs = 1;
-		open_files_table[files_opened].content.bits.rwpointer = 0;
+		open_files_table[files_opened].content.bits.rwpointer = 1999;
 		open_files_table[files_opened].content.bits.color = 15;
 		open_files_table[files_opened].logicpage = set_user_screen_page(task);
 	files_opened++;

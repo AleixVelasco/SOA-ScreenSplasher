@@ -101,7 +101,7 @@ ENTRY(get_stats)
 	ret
 
 /* int create_screen() */
-ENTRY(create_screen)
+ENTRY(createScreen)
 	pushl %ebp
 	movl %esp, %ebp
 	movl $25, %eax
@@ -125,7 +125,7 @@ ENTRY(close)
 	ret
 
 /* int set_focus(int canal) */
-ENTRY(set_focus)
+ENTRY(setFocus)
 	pushl %ebp
 	movl %esp, %ebp
 	pushl %ebx;  // Save EBX, ESI and EDI if modified

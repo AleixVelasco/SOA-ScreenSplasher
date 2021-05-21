@@ -24,7 +24,8 @@ void * get_ebp();
 
 int check_fd(int fd, int permissions)
 {
-  if (fd!=1) return -EBADF; 
+  //if (fd!=1) return -EBADF; 
+	if (fd<0 || fd>=current()->screens) return -EBADF;
   if (permissions!=ESCRIPTURA) return -EACCES; 
   return 0;
 }
@@ -211,30 +212,40 @@ Byte color;
 	if (!access_ok(VERIFY_READ, buffer, nbytes))
 		return -EFAULT;
 	
-  Word buff[nbytes];
+	Word buff[nbytes];
   color = current()->channel_table[fd]->content.bits.color;
+int x = 0, y= 0;
+
+		int j = 0;
+
   for(int i = 0; i<nbytes; ++i){ 
 		if(escapeCode == 0) {
+				// Condición para cambiar de color si previamente ha habido un escapeCode
+					if(changeColor == 1) {
+						// Foreground coloring
+						if(code[0] == '3') {
+							color = (Byte) ((color & 0xF0) | (Byte) (0x0F & code[1]));
+							
+						} else if(code[0] == '4') {// Background coloring
+							color = (Byte) (color & 0x0F) | (code[1]<<4);
+						}
+						current()->channel_table[fd]->content.bits.color = color;
+						changeColor = 0;
+						
+					}
+
+
 				// Condición para detectar el carcter especial para indicar el inicio del escapeCode
 				if(buffer[i] == '[') {
 					escapeCode = 1;//printk(" Entra ");
 					pos = 0;
 				} else {
-					// Condición para cambiar de color si previamente ha habido un escapeCode
-					if(changeColor == 1) {
-						// Foreground coloring
-						if(code[0] == '3') {
-							color = (Byte) (color & 0xF0) | code[1];
-						} else if(code[0] == '4') {// Background coloring
-							color = (Byte) (color & 0x0F) | (code[1]<<8);
-						}
-						changeColor = 0;
-					}
 				 Word color_w = 0xFF00 & (color<<8);
 				 Word w = (Word) (buffer[i] & 0x00FF) | color_w;
-				 //char a = (char)buffer[i];
-				 //printc(a,0x02);
-				 buff[i] = w;
+					char a = (char)buffer[i];
+				 //printc_xy((Byte)y,(Byte)x,a,color);
+				 buff[j] = w;
+					j++;
 				}
 		} else {
 			// Condición para detectar el carcter especial para indicar el final de escapeCode
@@ -249,9 +260,24 @@ Byte color;
 				}
 			}
 		}
-  }
 
-	copy_data((void*)&buff, (void*)(current()->channel_table[fd]->logicpage<<12), nbytes);
+y = j % 80;
+    if (j != 0 && j % 80 == 0) {
+        x++;
+    }
+		
+  }
+//MIRAR ESTO
+	current()->channel_table[fd]->content.bits.rwpointer = 0x221;
+	//(DWord) current()->channel_table[fd]->content.bits.rwpointer
+	copy_data((void*)&buff, (void*)(current()->channel_table[fd]->logicpage<<12), nbytes*2);
+	/*printc('\n',0x0F);
+	printc('A',0x01);	printc('A',0x02);	printc('A',0x03);	printc('A',0x04);	printc('A',0x05);	printc('A',0x06);	printc('A',0x07);	printc('A',0x08);	printc('A',0x09);	printc('A',0x0A);	printc('A',0x0B);
+	printc('A',0x0C);	printc('A',0x0D);	printc('A',0x0E);	printc('A',0x0F);
+	printc('\n',0x0F);
+	printc('A',0x10);	printc('A',0x20);	printc('A',0x30);	printc('A',0x40);	printc('A',0x50);	printc('A',0x60);	printc('A',0x70);	
+
+	char a = '\033';printc(a,0x0F);*/
 
 	/*bytes_left = nbytes;
 	while (bytes_left > TAM_BUFFER) {
@@ -329,19 +355,18 @@ int sys_get_stats(int pid, struct stats *st)
 
 extern int files_opened;
 
-int sys_create_screen()
+int sys_createScreen()
 {
-	struct task_struct *p = current();
-	int c = p->screens;
-	if(c <= 10 && files_opened < 30) {
-		p->channel_table[c] = open_screen_page( p );
-		if(p->channel_table[c] != NULL) {
-			p->foco = c;
-			p->screens++;
-			return c;
-		}
-	}
-	return -1;
+    struct task_struct *p = current();
+    int c = p->screens;//1
+    if(c <= 10 && files_opened < 30) {
+            p->screens++;
+        p->channel_table[c] = open_screen_page( p );//2
+        p->foco = c;
+
+        return c;
+    }
+    return -1;
 }
 
 int sys_close(){}

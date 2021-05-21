@@ -163,9 +163,7 @@ void clock_routine()
      printc_xy(i%80, y%25, caracter, col);
      salt++;
   }
-  
-  
-  
+
   }
   
   schedule();
