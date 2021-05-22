@@ -82,7 +82,7 @@ void clock_routine()
   char idProces[1];
   char idPantalla[1];
 
-  /*itoa(current()->PID, idProces);
+  itoa(current()->PID, idProces);
   itoa(current()->foco, idPantalla);
  
   int pos = 0;
@@ -104,7 +104,7 @@ void clock_routine()
   
   for(int i = pos; i < 80; i++){
     printc_xy(i,0,' ',0x02);
-  }*/
+  }
 
 
    /* Prueba */

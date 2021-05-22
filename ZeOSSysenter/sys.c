@@ -344,7 +344,7 @@ int sys_createScreen()
 int sys_close()
 {
     struct task_struct *p = current();
-        page_table_entry process_PT = get_PT(current());
+        page_table_entry *process_PT = get_PT(current());
     int c = p->screens;
     if(c > 1) {
         p->screens--;
