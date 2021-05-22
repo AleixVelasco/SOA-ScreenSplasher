@@ -107,8 +107,8 @@ void clock_routine()
   }
 
 
-   /* Prueba 
-
+   /* Prueba */
+   /*
    //De buffer->pagina de pantalla (color+caracter)
 
    char buffp[500] = "Hello I am a multicolor operating system Hello I am a multicolor operating system Hello I am a multicolor operating system Hello I am a multicolor operating system Hello I am a multicolor operating system";
@@ -125,10 +125,9 @@ void clock_routine()
   }
   copy_data((void*)&buf, (void*)(current()->channel_table[current()->foco]->logicpage<<12), 1000); //Copy data va por bytes al ser un word se ha de pasar el doble
   current()->channel_table[current()->foco]->content.bits.rwpointer = 0x005;
-   /* Prueba  */
-
-   //Clean pantalla/*
-   
+  
+   */
+   /* Prueba */
    /* Copiamos contenido extraido de la tabla de pantallas */
 
   //Coger contenido del foco actual y pasarlo a un buffer
@@ -178,16 +177,17 @@ void keyboard_routine()
   unsigned char c = inb(0x60);
 
   //Si se despulsa shift desmarcalo
-  if(((c&0x80 )== 0) && (c&0x7f) == 0x2a) shift_pulsat = 0;
- 
+  if(((c>>7) == 1) && (c&0x7f) == 0x2a){
+  shift_pulsat = 0;
+  }
   //Si la tecla pulsada es tab y shift ya ha sido pulsado, cambia foco
   else if ((c&0x80) && ((c&0x7f) == 0x0f) && shift_pulsat == 1){
-  current()->foco = (current()->foco)+1 % current()->screens;
+  current()->foco = (((current()->foco)+1)%current()->screens);
   }
   //Si la tecla pulsada no es tab, comprueba que es shift
-  else if ((c&0x80) && (c&0x7f) == 0x2a) shift_pulsat = 1;
-  
-
+  else if (((c>>7) == 0) && (c&0x7f) == 0x2a){
+  shift_pulsat = 1;
+  }
   
 }
 

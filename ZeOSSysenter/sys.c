@@ -268,7 +268,7 @@ y = j % 80;
 		
   }
 //MIRAR ESTO
-	current()->channel_table[fd]->content.bits.rwpointer = 0x221;
+        current()->channel_table[fd]->content.bits.rwpointer = ((y & 0x7F)<<5) | (x & 0x1F);
 	//(DWord) current()->channel_table[fd]->content.bits.rwpointer
 	copy_data((void*)&buff, (void*)(current()->channel_table[fd]->logicpage<<12), nbytes*2);
 	/*printc('\n',0x0F);
@@ -369,10 +369,10 @@ int sys_createScreen()
     return -1;
 }
 
-int sys_close(){}
-/*
+int sys_close()
+{
 	struct task_struct *p = current();
-        page_table_entry *process_PT = get_PT(current());
+        //page_table_entry *process_PT = get_PT(current());
 	int c = p->screens;
 	if(c > 1) {
 		p->screens--;
@@ -390,10 +390,10 @@ int sys_close(){}
 
 		   /* Deallocate allocated pages. Delete reserved pages. */
 
-/*
 
-                   free_frame(get_frame(process_PT, (unsigned int)(p->channel_table[p->foco]->logicpage)));
-                   p->channel_table[p->foco]->logicpage->entry = 0;
+
+                   //free_frame(get_frame(process_PT, (unsigned int)(p->channel_table[p->foco]->logicpage)));
+                   //p->channel_table[p->foco]->logicpage->entry = 0;
 
 		   p->channel_table[p->foco]->logicpage = NULL;
 
@@ -408,7 +408,6 @@ int sys_close(){}
 	}
 	return -1;
 }
-*/
 
 int sys_getfocus(int focus)
 {
