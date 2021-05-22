@@ -82,7 +82,7 @@ void clock_routine()
   char idProces[1];
   char idPantalla[1];
 
-  itoa(current()->PID, idProces);
+  /*itoa(current()->PID, idProces);
   itoa(current()->foco, idPantalla);
  
   int pos = 0;
@@ -104,7 +104,7 @@ void clock_routine()
   
   for(int i = pos; i < 80; i++){
     printc_xy(i,0,' ',0x02);
-  }
+  }*/
 
 
    /* Prueba */
@@ -138,7 +138,19 @@ void clock_routine()
   
   int caracteres_totales = filas_rwpointer * 80 + columnas_rwpointer;
   Word total_c[caracteres_totales];
+printc_xy(6,6,'H',0x02);
+current()->foco;
+printc_xy(6,7,'H',0x02);
+current()->channel_table[current()->foco];
 
+printc_xy(6,8,'H',0x02);
+itoa(current()->channel_table[current()->foco]->logicpage<<12, idProces);
+printk(idProces);
+if(current()->channel_table[current()->foco]->logicpage == NULL){
+
+	printc_xy(6,12,'N',0x02);
+}
+printc_xy(6,9,'H',0x02);
   copy_data((void*)((int)(current()->channel_table[current()->foco]->logicpage)<<12), total_c, caracteres_totales*2);
 
   //Pintamos contenido

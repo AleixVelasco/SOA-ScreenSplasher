@@ -73,7 +73,7 @@ int sys_fork(void)
   
   /* Copy the parent's task struct to child's */
   copy_data(current(), uchild, sizeof(union task_union));
-  
+
 	/* Inc the ref of the opened screens */
 	for (int i=0; i<10; i++)
   {
@@ -112,31 +112,6 @@ int sys_fork(void)
     }
   }
 
-  int screens = current()->screens;
-  for (pag=NUM_PAG_DATA; pag<NUM_PAG_DATA+screens; pag++)
-  {
-    new_ph_pag=alloc_frame();
-    if (new_ph_pag!=-1) /* One page allocated */
-    {
-      set_ss_screen_pag(process_PT, PAG_LOG_INIT_DATA+pag, new_ph_pag);
-    }
-    else /* No more free pages left. Deallocate everything */
-    {
-      /* Deallocate allocated pages. Up to pag. */
-      for (i=0; i<pag; i++)
-      {
-        free_frame(get_frame(process_PT, PAG_LOG_INIT_DATA+i));
-        del_ss_pag(process_PT, PAG_LOG_INIT_DATA+i);
-      }
-      /* Deallocate task_struct */
-      list_add_tail(lhcurrent, &freequeue);
-      
-      /* Return error */
-      return -EAGAIN; 
-    }
-  }
-
-
   /* Copy parent's SYSTEM and CODE to child. */
   page_table_entry *parent_PT = get_PT(current());
   for (pag=0; pag<NUM_PAG_KERNEL; pag++)
@@ -156,12 +131,10 @@ int sys_fork(void)
     del_ss_pag(parent_PT, pag+NUM_PAG_DATA);
   }
 
+	int screens = current()->screens;
 	for (pag=NUM_PAG_KERNEL+NUM_PAG_CODE+NUM_PAG_DATA; pag<NUM_PAG_KERNEL+NUM_PAG_CODE+NUM_PAG_DATA+screens; pag++)
   {
-    /* Map one child page to parent's address space. */
-    set_ss_screen_pag(parent_PT, pag+NUM_PAG_DATA, get_frame(process_PT, pag));
-    copy_data((void*)(pag<<12), (void*)((pag+NUM_PAG_DATA)<<12), PAGE_SIZE);
-    del_ss_pag(parent_PT, pag+NUM_PAG_DATA);
+    set_ss_screen_pag(process_PT, pag, get_frame(parent_PT, pag));
   }
 
   /* Deny access to the child's memory space */
@@ -190,7 +163,6 @@ int sys_fork(void)
   /* Queue child process into readyqueue */
   uchild->task.state=ST_READY;
   list_add_tail(&(uchild->task.list), &readyqueue);
-  
   return uchild->task.PID;
 }
 
@@ -371,42 +343,38 @@ int sys_createScreen()
 
 int sys_close()
 {
-	struct task_struct *p = current();
-        //page_table_entry *process_PT = get_PT(current());
-	int c = p->screens;
-	if(c > 1) {
-		p->screens--;
+    struct task_struct *p = current();
+        page_table_entry process_PT = get_PT(current());
+    int c = p->screens;
+    if(c > 1) {
+        p->screens--;
 
-		//del_user_page_screen(p,p->screens); usar?
+        //del_user_page_screen(p,p->screens); usar?
 
-		//Eliminar de la tabla pantallas y si se queda sin referencias quitarlo todo
+        //Eliminar de la tabla pantallas y si se queda sin referencias quitarlo todo
                 p->channel_table[p->foco]->content.bits.refs = (p->channel_table[p->foco]->content.bits.refs) - 1;
 
                 if (p->channel_table[p->foco]->content.bits.refs == 0){
                    p->channel_table[p->foco]->content.entry = 0;
-		   p->channel_table[p->foco]->content.bits.refs = 0;
-		   p->channel_table[p->foco]->content.bits.rwpointer = 0;
-		   p->channel_table[p->foco]->content.bits.color = 0;
+           p->channel_table[p->foco]->content.bits.refs = 0;
+           p->channel_table[p->foco]->content.bits.rwpointer = 0;
+           p->channel_table[p->foco]->content.bits.color = 0;
 
-		   /* Deallocate allocated pages. Delete reserved pages. */
+           /* Deallocate allocated pages. Delete reserved pages. */
+                   free_frame(get_frame(process_PT, p->channel_table[p->foco]->logicpage));
+                   p->channel_table[p->foco]->content.entry = 0;
+           p->channel_table[p->foco]->logicpage = NULL;
 
+               files_opened--;
 
-
-                   //free_frame(get_frame(process_PT, (unsigned int)(p->channel_table[p->foco]->logicpage)));
-                   //p->channel_table[p->foco]->logicpage->entry = 0;
-
-		   p->channel_table[p->foco]->logicpage = NULL;
-
-	           files_opened--;
-      
                 }
 
-		//Eliminar de la tabla de canales y cambiar foco
+        //Eliminar de la tabla de canales y cambiar foco
                 p->channel_table[p->foco] = NULL;
-		p->foco = (p->screens)-1;
-		return 0;
-	}
-	return -1;
+        p->foco = (p->screens)-1;
+        return 0;
+    }
+    return -1;
 }
 
 int sys_getfocus(int focus)

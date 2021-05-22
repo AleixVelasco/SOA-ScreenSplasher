@@ -11,13 +11,13 @@ int __attribute__ ((__section__(".text.main")))
      /* __asm__ __volatile__ ("mov %0, %%cr3"::"r" (0) ); */
 
    // TEST 1 
-	char *buff = "Muestra [47m[31mesto por pan[30mtalla virtual"; 
-  write(0,buff,strlen(buff)); 
+	/*char *buff = "Muestra [47m[31mesto por pan[30mtalla virtual"; 
+  write(0,buff,strlen(buff)); */
  //TEST 2 
-	int fd = createScreen(); 
+	/*int fd = createScreen(); 
 	char m[1];
 	itoa(fd,m);
-	write(fd,m,strlen(m));
+	write(fd,m,strlen(m));*/
  /*char *buff = "Muestra esto por la segunda pantalla virtual"; 
  write(fd,buff,strlen(buff)); */
 
@@ -25,6 +25,20 @@ int __attribute__ ((__section__(".text.main")))
  //TEST 4 
  //int f = setFocus(3); 
  // Error f = -1 */
+	char *buff;
+int fd;
+int ret = fork();
+	/*switch(fork()) 
+	{
+		case 0:
+			fd = createScreen();
+			buff = "Muestra hijo"; 
+ 			write(fd,buff,strlen(buff)); 
+			break;
+		default:
+			buff = "Muestra padre-hijo"; 
+		  write(0,buff,strlen(buff)); 
+	}*/
 
   while(1) { }
 }
