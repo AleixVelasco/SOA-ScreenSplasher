@@ -78,7 +78,7 @@ void clock_routine()
   /* Prueba */
 
   /* Pintamos identificador de la pantalla y el proceso actual */
-
+  
   char idProces[1];
   char idPantalla[1];
 
@@ -106,7 +106,6 @@ void clock_routine()
     printc_xy(i,0,' ',0x02);
   }
 
-
    /* Prueba */
    /*
    //De buffer->pagina de pantalla (color+caracter)
@@ -128,32 +127,41 @@ void clock_routine()
   
    */
    /* Prueba */
-   /* Copiamos contenido extraido de la tabla de pantallas */
 
+   /* Copiamos contenido extraido de la tabla de pantallas */
   //Coger contenido del foco actual y pasarlo a un buffer
   //Caracteres totales = filas_rwpointer * columnas_totales + columnas_rwpointer
   
   int columnas_rwpointer = (int)((current()->channel_table[current()->foco]->content.bits.rwpointer)>>5);
-  int filas_rwpointer = (int)((current()->channel_table[current()->foco]->content.bits.rwpointer)&0x05);
+  int filas_rwpointer = (int)((current()->channel_table[current()->foco]->content.bits.rwpointer)&0x1F);
+
+ /*
+ char buffa[5];
+ printk("columnas:");
+ itoa(columnas_rwpointer, buffa);
+ printk(buffa);
+
+ char buffb[5];
+ printk("filas:");
+ itoa(filas_rwpointer, buffb);
+ printk(buffb);
+ printk("  ");
+ */
   
   int caracteres_totales = filas_rwpointer * 80 + columnas_rwpointer;
   Word total_c[caracteres_totales];
-printc_xy(6,6,'H',0x02);
-current()->foco;
-printc_xy(6,7,'H',0x02);
-current()->channel_table[current()->foco];
 
-printc_xy(6,8,'H',0x02);
-itoa(current()->channel_table[current()->foco]->logicpage<<12, idProces);
-printk(idProces);
-if(current()->channel_table[current()->foco]->logicpage == NULL){
+ copy_data((void*)((int)(current()->channel_table[current()->foco]->logicpage)<<12), total_c, caracteres_totales*2);
 
-	printc_xy(6,12,'N',0x02);
-}
-printc_xy(6,9,'H',0x02);
-  copy_data((void*)((int)(current()->channel_table[current()->foco]->logicpage)<<12), total_c, caracteres_totales*2);
+ /*
+ printk(" total:");
+ char buff[6];
+ itoa(caracteres_totales, buff);
+printk(buff);
+*/
 
   //Pintamos contenido
+
   int y = 1;
   int salt = 0;
   for(int i = 0; i < 80*24; i++){
@@ -174,7 +182,7 @@ printc_xy(6,9,'H',0x02);
      printc_xy(i%80, y%25, caracter, col);
      salt++;
   }
-
+  
   }
   
   schedule();

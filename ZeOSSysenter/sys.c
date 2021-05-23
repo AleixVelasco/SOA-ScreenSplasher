@@ -131,8 +131,8 @@ int sys_fork(void)
     del_ss_pag(parent_PT, pag+NUM_PAG_DATA);
   }
 
-	int screens = current()->screens;
-	for (pag=NUM_PAG_KERNEL+NUM_PAG_CODE+NUM_PAG_DATA; pag<NUM_PAG_KERNEL+NUM_PAG_CODE+NUM_PAG_DATA+screens; pag++)
+ int screens = current()->screens;
+ for (pag=NUM_PAG_KERNEL+NUM_PAG_CODE+NUM_PAG_DATA+1; pag<NUM_PAG_KERNEL+NUM_PAG_CODE+NUM_PAG_DATA+screens; pag++)
   {
     set_ss_screen_pag(process_PT, pag, get_frame(parent_PT, pag));
   }
@@ -175,6 +175,13 @@ int ret;
 int escapeCode = 0, changeColor = 0;
 char code[2];
 int pos = 0;
+
+printk("BUff: ");
+char bufff[10];
+itoa(nbytes, bufff);
+        printk(bufff);
+        printk("   ");
+
 Byte color;
 
 	if ((ret = check_fd(fd, ESCRIPTURA)))
@@ -184,9 +191,9 @@ Byte color;
 	if (!access_ok(VERIFY_READ, buffer, nbytes))
 		return -EFAULT;
 	
-	Word buff[nbytes];
+  Word buff[nbytes];
   color = current()->channel_table[fd]->content.bits.color;
-int x = 0, y= 0;
+  int x = 0, y= 0;
 
 		int j = 0;
 
@@ -233,7 +240,7 @@ int x = 0, y= 0;
 			}
 		}
 
-y = j % 80;
+    y = j % 80;
     if (j != 0 && j % 80 == 0) {
         x++;
     }
@@ -241,8 +248,11 @@ y = j % 80;
   }
 //MIRAR ESTO
         current()->channel_table[fd]->content.bits.rwpointer = ((y & 0x7F)<<5) | (x & 0x1F);
+        //current()->channel_table[fd]->content.bits.rwpointer = fin;
 	//(DWord) current()->channel_table[fd]->content.bits.rwpointer
 	copy_data((void*)&buff, (void*)(current()->channel_table[fd]->logicpage<<12), nbytes*2);
+
+        
 	/*printc('\n',0x0F);
 	printc('A',0x01);	printc('A',0x02);	printc('A',0x03);	printc('A',0x04);	printc('A',0x05);	printc('A',0x06);	printc('A',0x07);	printc('A',0x08);	printc('A',0x09);	printc('A',0x0A);	printc('A',0x0B);
 	printc('A',0x0C);	printc('A',0x0D);	printc('A',0x0E);	printc('A',0x0F);
@@ -330,9 +340,9 @@ extern int files_opened;
 int sys_createScreen()
 {
     struct task_struct *p = current();
-    int c = p->screens;//1
-    if(c <= 10 && files_opened < 30) {
-            p->screens++;
+    int c = p->screens;
+    if(c < 10 && files_opened < 30) {
+        p->screens++;
         p->channel_table[c] = open_screen_page( p );//2
         p->foco = c;
 
