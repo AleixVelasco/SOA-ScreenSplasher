@@ -35,12 +35,17 @@ char char_map[] =
 };
 
 int zeos_ticks = 0;
+int new_fps = 0;
+int old_fps = 0;
+
+void fps_routine(){
+
+}
 
 void clock_routine()
 {
   //zeos_show_clock();
   zeos_ticks ++;
- 
 
   if(zeos_ticks > 3){
   /* Prueba  */
@@ -101,8 +106,28 @@ void clock_routine()
   }
   printc_xy(pos,0, idProces[0],0x70);
   pos++;
+ 
+  //Mostramos buffers 
+  char buff_fps[8] = " | FPS:";
+  char fps_c[2];
+  itoa(old_fps,fps_c);
+  for(int i = 0; buff_fps[i]; ++i){
+    printc_xy(pos,0, buff_fps[i],0x70);
+    pos++;
+  }
+  for(int i = 0; fps_c[i]; ++i){
+    printc_xy(pos,0, fps_c[i],0x70);
+    pos++;
+  }
+  if(old_fps > 9) pos++;
   
-  for(int i = pos; i < 80; i++){
+  //Obtenemos con zeos_ticks si ha llegado a 18 ticks = 1 segundo
+  if(zeos_ticks%18 == 0 && zeos_ticks!=0){
+   old_fps = new_fps;
+   new_fps = 0;
+  }
+
+  for(int i = pos; i < 80-pos; i++){
     printc_xy(i,0,' ',0x02);
   }
 
@@ -161,7 +186,6 @@ printk(buff);
 */
 
   //Pintamos contenido
-
   int y = 1;
   int salt = 0;
   for(int i = 0; i < 80*24; i++){
@@ -182,6 +206,7 @@ printk(buff);
      printc_xy(i%80, y%25, caracter, col);
      salt++;
   }
+  new_fps++;
   
   }
   

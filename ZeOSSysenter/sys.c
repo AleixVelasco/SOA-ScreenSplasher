@@ -175,13 +175,13 @@ int ret;
 int escapeCode = 0, changeColor = 0;
 char code[2];
 int pos = 0;
-
+/*
 printk("BUff: ");
 char bufff[10];
 itoa(nbytes, bufff);
         printk(bufff);
         printk("   ");
-
+*/
 Byte color;
 
 	if ((ret = check_fd(fd, ESCRIPTURA)))
