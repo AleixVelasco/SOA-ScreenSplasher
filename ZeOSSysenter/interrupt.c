@@ -84,7 +84,7 @@ void clock_routine()
 
   /* Pintamos identificador de la pantalla y el proceso actual */
   
-  char idProces[1];
+  char idProces[5];
   char idPantalla[1];
 
   itoa(current()->PID, idProces);
@@ -104,33 +104,42 @@ void clock_routine()
     printc_xy(pos,0, buffer2[i],0x70);
     pos++;
   }
-  printc_xy(pos,0, idProces[0],0x70);
-  pos++;
- 
+  int ln = 2;
+  if(current()->PID < 10) ln = 1;
+  if(current()->PID >= 1000) ln = 4;
+  for(int i = 0; i<ln; ++i){
+    printc_xy(pos,0, idProces[i],0x70);
+    pos++;
+  }
+
   //Mostramos buffers 
+ 
   char buff_fps[8] = " | FPS:";
-  char fps_c[2];
-  itoa(old_fps,fps_c);
   for(int i = 0; buff_fps[i]; ++i){
     printc_xy(pos,0, buff_fps[i],0x70);
     pos++;
   }
+  char fps_c[2];
+  itoa(old_fps,fps_c);
   for(int i = 0; fps_c[i]; ++i){
     printc_xy(pos,0, fps_c[i],0x70);
     pos++;
   }
   if(old_fps > 9) pos++;
   
+  //obtenemos segundos
+  
   //Obtenemos con zeos_ticks si ha llegado a 18 ticks = 1 segundo
+  
   if(zeos_ticks%18 == 0 && zeos_ticks!=0){
    old_fps = new_fps;
    new_fps = 0;
   }
-
+  
   for(int i = pos; i < 80-pos; i++){
     printc_xy(i,0,' ',0x02);
   }
-
+  
    /* Prueba */
    /*
    //De buffer->pagina de pantalla (color+caracter)
@@ -162,10 +171,9 @@ void clock_routine()
   
   int caracteres_totales = filas_rwpointer * 80 + columnas_rwpointer;
   Word total_c[caracteres_totales];
-
- copy_data((void*)((int)(current()->channel_table[current()->foco]->logicpage)<<12), total_c, caracteres_totales*2);
-
+  copy_data((void*)((int)(current()->channel_table[current()->foco]->logicpage)<<12), total_c, caracteres_totales*2);
   //Pintamos contenido
+  
   int y = 1;
   int salt = 0;
   for(int i = 0; i < 80*24; i++){
