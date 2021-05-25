@@ -159,31 +159,11 @@ void clock_routine()
   
   int columnas_rwpointer = (int)((current()->channel_table[current()->foco]->content.bits.rwpointer)>>5);
   int filas_rwpointer = (int)((current()->channel_table[current()->foco]->content.bits.rwpointer)&0x1F);
-
- /*
- char buffa[5];
- printk("columnas:");
- itoa(columnas_rwpointer, buffa);
- printk(buffa);
-
- char buffb[5];
- printk("filas:");
- itoa(filas_rwpointer, buffb);
- printk(buffb);
- printk("  ");
- */
   
   int caracteres_totales = filas_rwpointer * 80 + columnas_rwpointer;
   Word total_c[caracteres_totales];
 
  copy_data((void*)((int)(current()->channel_table[current()->foco]->logicpage)<<12), total_c, caracteres_totales*2);
-
- /*
- printk(" total:");
- char buff[6];
- itoa(caracteres_totales, buff);
-printk(buff);
-*/
 
   //Pintamos contenido
   int y = 1;

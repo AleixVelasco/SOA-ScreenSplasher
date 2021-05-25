@@ -11,8 +11,10 @@ int __attribute__ ((__section__(".text.main")))
      /* __asm__ __volatile__ ("mov %0, %%cr3"::"r" (0) ); */
 
    // TEST 1 
-	/*char *buff = "Muestra [47m[31mesto por pan[30mtalla virtual"; 
-  write(0,buff,strlen(buff)); */
+	char *buff = "Muestra [47m[31mesto por\177 pan[30mtalla virtual\177\177\177\177\177\177\177"; 
+  write(0,buff,strlen(buff)); 
+	*buff = "\177";
+	write(0,buff,strlen(buff)); 
  //TEST 2 
  /*
 	int fd = createScreen(); 

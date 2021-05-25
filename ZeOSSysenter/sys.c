@@ -172,16 +172,10 @@ int sys_write(int fd, char *buffer, int nbytes) {
 char localbuffer [TAM_BUFFER];
 int bytes_left;
 int ret;
-int escapeCode = 0, changeColor = 0;
-char code[2];
+int escapeCode = 0, changeColor = 0, changeCursor = 0;
+char code[5];
 int pos = 0;
-/*
-printk("BUff: ");
-char bufff[10];
-itoa(nbytes, bufff);
-        printk(bufff);
-        printk("   ");
-*/
+
 Byte color;
 
 	if ((ret = check_fd(fd, ESCRIPTURA)))
@@ -194,8 +188,7 @@ Byte color;
   Word buff[nbytes];
   color = current()->channel_table[fd]->content.bits.color;
   int x = 0, y= 0;
-
-		int j = 0;
+	int j = 0;
 
   for(int i = 0; i<nbytes; ++i){ 
 		if(escapeCode == 0) {
@@ -212,25 +205,60 @@ Byte color;
 						changeColor = 0;
 						
 					}
-
+					if(changeCursor == 1){
+						if(strlen(&code) == 3 && code[1] == ';'){
+							if((int)code[0] >=0 && (int)code[0] < 25 && (int)code[2] >=0 && (int)code[2] < 80) {
+								current()->channel_table[fd]->content.bits.rwpointer = ((code[2] & 0x7F)<<5) | (code[0] & 0x1F); 
+							}
+						}else if(strlen(&code) == 4 && code[1] == ';') {
+							int aux = (((int)code[2])*10) + (int)code[3];
+							if((int)code[0] >=0 && (int)code[0] < 25 && aux >=0 && aux < 80) {
+								current()->channel_table[fd]->content.bits.rwpointer = ((aux & 0x7F)<<5) | (code[0] & 0x1F);  
+							}
+						}else if(strlen(&code) == 4 && code[2] == ';') {
+							int aux = (((int)code[0])*10) + (int)code[1];
+							if(aux >=0 && aux < 25 && (int)code[3] >=0 && (int)code[3] < 80) {
+								current()->channel_table[fd]->content.bits.rwpointer = ((code[3] & 0x7F)<<5) | (aux & 0x1F);
+							}
+						}else if(strlen(&code) == 5 && code[3] == ';') {
+							int aux1 = (((int)code[0])*10) + (int)code[1];
+							int aux2 = (((int)code[2])*10) + (int)code[3];
+							if(aux1 >=0 && aux1 < 25 && aux2 >=0 && aux2 < 80) {
+								current()->channel_table[fd]->content.bits.rwpointer = ((aux2 & 0x7F)<<5) | (aux1 & 0x1F);
+							}
+						}
+						changeCursor = 0;
+					}
 
 				// Condición para detectar el carcter especial para indicar el inicio del escapeCode
 				if(buffer[i] == '[') {
-					escapeCode = 1;//printk(" Entra ");
+					escapeCode = 1;
 					pos = 0;
+				}else if(buffer[i] == '\177') {
+					if(j>0) {
+						j--;
+					}
+					int columnas_rwpointer = (int)((current()->channel_table[current()->foco]->content.bits.rwpointer)>>5);
+ 					int filas_rwpointer = (int)((current()->channel_table[current()->foco]->content.bits.rwpointer)&0x1F);
+  				int caracteres_totales = filas_rwpointer * 80 + columnas_rwpointer;
+					if(caracteres_totales > 0)	caracteres_totales -= 1;
+					current()->channel_table[fd]->content.bits.rwpointer = ((caracteres_totales & 0x7F)<<5) | (caracteres_totales & 0x1F);
 				} else {
 				 Word color_w = 0xFF00 & (color<<8);
 				 Word w = (Word) (buffer[i] & 0x00FF) | color_w;
-					char a = (char)buffer[i];
-				 //printc_xy((Byte)y,(Byte)x,a,color);
-				 buff[j] = w;
-					j++;
+				 if(j>=0){
+				 	buff[j] = w;
+				 }
+				 j++;
 				}
 		} else {
 			// Condición para detectar el carcter especial para indicar el final de escapeCode
 			if(buffer[i] == 'm') {
 				escapeCode = 0;
-				changeColor = 1;//printk(" Sale ");
+				changeColor = 1;
+			}else if(buffer[i] == 'f') {
+				escapeCode = 0;
+				changeCursor = 1;
 			} else {
 				// Condición para que no desborde  el buffer del code
 				if(pos <2){
@@ -246,10 +274,12 @@ Byte color;
     }
 		
   }
-//MIRAR ESTO
-        current()->channel_table[fd]->content.bits.rwpointer = ((y & 0x7F)<<5) | (x & 0x1F);
-        //current()->channel_table[fd]->content.bits.rwpointer = fin;
-	//(DWord) current()->channel_table[fd]->content.bits.rwpointer
+	
+	if (j > 1920)
+		return -EINVAL;
+
+  current()->channel_table[fd]->content.bits.rwpointer = ((y & 0x7F)<<5) | (x & 0x1F);
+
 	copy_data((void*)&buff, (void*)(current()->channel_table[fd]->logicpage<<12), nbytes*2);
 
         
@@ -257,9 +287,7 @@ Byte color;
 	printc('A',0x01);	printc('A',0x02);	printc('A',0x03);	printc('A',0x04);	printc('A',0x05);	printc('A',0x06);	printc('A',0x07);	printc('A',0x08);	printc('A',0x09);	printc('A',0x0A);	printc('A',0x0B);
 	printc('A',0x0C);	printc('A',0x0D);	printc('A',0x0E);	printc('A',0x0F);
 	printc('\n',0x0F);
-	printc('A',0x10);	printc('A',0x20);	printc('A',0x30);	printc('A',0x40);	printc('A',0x50);	printc('A',0x60);	printc('A',0x70);	
-
-	char a = '\033';printc(a,0x0F);*/
+	printc('A',0x10);	printc('A',0x20);	printc('A',0x30);	printc('A',0x40);	printc('A',0x50);	printc('A',0x60);	printc('A',0x70);	*/
 
 	/*bytes_left = nbytes;
 	while (bytes_left > TAM_BUFFER) {
