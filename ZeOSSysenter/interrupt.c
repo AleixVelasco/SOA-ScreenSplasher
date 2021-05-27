@@ -162,7 +162,7 @@ void clock_routine()
    */
    /* Prueba */
 
-   /* Copiamos contenido extraido de la tabla de pantallas */
+   /* Copiamos contenido extraido de la tabla de pantallas *
   //Coger contenido del foco actual y pasarlo a un buffer
   //Caracteres totales = filas_rwpointer * columnas_totales + columnas_rwpointer
   
@@ -194,8 +194,41 @@ void clock_routine()
      printc_xy(i%80, y%25, caracter, col);
      salt++;
   }
-  new_fps++;
+  new_fps++;*/
   
+		int x = 0, y = 1;
+		DWord screen = (DWord)(current()->channel_table[current()->foco]->logicpage<<12);
+		for(DWord *i = screen ;i < screen + PAGE_SIZE;i++) {
+			DWord m = *i;
+			Byte bcolor1 = (Byte) (m>>8);
+			Byte bchar1 = (Byte) m;
+			Byte bcolor2 = (Byte) (m>>24);
+			Byte bchar2 = (Byte) (m>>16);
+
+			/*if((y * 80 + x) == (int) current()->channel_table[current()->foco]->content.bits.rwpointer) {
+				bcolor1 = (bcolor1 & 0x7F) | 0x80;
+			}*/
+
+			printc_xy(x, y, bchar1, bcolor1);
+
+			x++;
+			if(x == 80 && y < 24){
+				x = 0; 
+				y++;
+			}
+
+			/*if((y * 80 + x) == (int) current()->channel_table[current()->foco]->content.bits.rwpointer) {
+				bcolor2 = (bcolor2 & 0x7F) | 0x80;
+			}*/
+
+	 		printc_xy(x, y, bchar2, bcolor2);
+
+			x++;
+			if(x == 80 && y < 24){
+				x = 0; 
+				y++;
+			}
+		}
   }
   
   schedule();

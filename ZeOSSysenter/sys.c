@@ -173,14 +173,14 @@ int sys_fork(void)
 #define TAM_BUFFER 512
 
 int sys_write(int fd, char *buffer, int nbytes) {
-char localbuffer [TAM_BUFFER];
-int bytes_left;
-int ret;
-int escapeCode = 0, changeColor = 0, changeCursor = 0;
-char code[5];
-int pos = 0;
+	char localbuffer [TAM_BUFFER];
+	int bytes_left;
+	int ret;
+	int escapeCode = 0, changeColor = 0, changeCursor = 0, delete = 0;
+	char code[5];
+	int pos = 0;
 
-Byte color;
+ 	int changeForegroundColor = -1, changeBackgroundColor = -1, changeCursorPos = -1;
 
 	if ((ret = check_fd(fd, ESCRIPTURA)))
 		return ret;
@@ -189,104 +189,115 @@ Byte color;
 	if (!access_ok(VERIFY_READ, buffer, nbytes))
 		return -EFAULT;
 	
-  Word buff[nbytes];
-  color = current()->channel_table[fd]->content.bits.color;
-  int x = 0, y= 0;
-	int j = 0;
 
-  for(int i = 0; i<nbytes; ++i){ 
-		if(escapeCode == 0) {
-				// Condición para cambiar de color si previamente ha habido un escapeCode
-					if(changeColor == 1) {
-						// Foreground coloring
-						if(code[0] == '3') {
-							color = (Byte) ((color & 0xF0) | (Byte) (0x0F & code[1]));
-							
-						} else if(code[0] == '4') {// Background coloring
-							color = (Byte) (color & 0x0F) | (code[1]<<4);
-						}
-						current()->channel_table[fd]->content.bits.color = color;
-						changeColor = 0;
-						
-					}
-					if(changeCursor == 1){
-						if(strlen(&code) == 3 && code[1] == ';'){
-							if((int)code[0] >=0 && (int)code[0] < 25 && (int)code[2] >=0 && (int)code[2] < 80) {
-								current()->channel_table[fd]->content.bits.rwpointer = ((code[2] & 0x7F)<<5) | (code[0] & 0x1F); 
-							}
-						}else if(strlen(&code) == 4 && code[1] == ';') {
-							int aux = (((int)code[2])*10) + (int)code[3];
-							if((int)code[0] >=0 && (int)code[0] < 25 && aux >=0 && aux < 80) {
-								current()->channel_table[fd]->content.bits.rwpointer = ((aux & 0x7F)<<5) | (code[0] & 0x1F);  
-							}
-						}else if(strlen(&code) == 4 && code[2] == ';') {
-							int aux = (((int)code[0])*10) + (int)code[1];
-							if(aux >=0 && aux < 25 && (int)code[3] >=0 && (int)code[3] < 80) {
-								current()->channel_table[fd]->content.bits.rwpointer = ((code[3] & 0x7F)<<5) | (aux & 0x1F);
-							}
-						}else if(strlen(&code) == 5 && code[3] == ';') {
-							int aux1 = (((int)code[0])*10) + (int)code[1];
-							int aux2 = (((int)code[2])*10) + (int)code[3];
-							if(aux1 >=0 && aux1 < 25 && aux2 >=0 && aux2 < 80) {
-								current()->channel_table[fd]->content.bits.rwpointer = ((aux2 & 0x7F)<<5) | (aux1 & 0x1F);
-							}
-						}
-						changeCursor = 0;
-					}
+	Byte color = (Byte) current()->channel_table[fd]->content.bits.color;
+	int positionCursor = (int) current()->channel_table[fd]->content.bits.rwpointer;
 
-				// Condición para detectar el carcter especial para indicar el inicio del escapeCode
-				if(buffer[i] == '[') {
-					escapeCode = 1;
-					pos = 0;
-				}else if(buffer[i] == '\177') {
-					if(j>0) {
-						j--;
-					}
-					int columnas_rwpointer = (int)((current()->channel_table[current()->foco]->content.bits.rwpointer)>>5);
- 					int filas_rwpointer = (int)((current()->channel_table[current()->foco]->content.bits.rwpointer)&0x1F);
-  				int caracteres_totales = filas_rwpointer * 80 + columnas_rwpointer;
-					if(caracteres_totales > 0)	caracteres_totales -= 1;
-					current()->channel_table[fd]->content.bits.rwpointer = ((caracteres_totales & 0x7F)<<5) | (caracteres_totales & 0x1F);
-				} else {
-				 Word color_w = 0xFF00 & (color<<8);
-				 Word w = (Word) (buffer[i] & 0x00FF) | color_w;
-				 if(j>=0){
-				 	buff[j] = w;
-				 }
-				 j++;
-				}
-		} else {
-			// Condición para detectar el carcter especial para indicar el final de escapeCode
-			if(buffer[i] == 'm') {
-				escapeCode = 0;
-				changeColor = 1;
-			}else if(buffer[i] == 'f') {
-				escapeCode = 0;
-				changeCursor = 1;
-			} else {
-				// Condición para que no desborde  el buffer del code
-				if(pos <2){
-					code[pos] = buffer[i];
-					pos++;
-				}
+	DWord *screen = (DWord)(current()->channel_table[fd]->logicpage<<12);
+
+	/*if((screen + (DWord) (positionCursor/2)) > (screen + PAGE_SIZE)){
+		bytes_left = ((screen + (DWord) (positionCursor/2)) - (screen + PAGE_SIZE))*2;
+	}*/
+	//int currPos = (int) current()->channel_table[fd]->content.bits.rwpointer;
+
+	DWord checkPos = (DWord) current()->channel_table[fd]->content.bits.rwpointer;
+	for(int i = 0; i<nbytes; ++i){
+
+		// Change Color
+		if(changeColor == 1) {
+			// Foreground coloring
+			if(changeForegroundColor > -1) {
+				color = (Byte) ((color & 0xF0) | (Byte) (0x0F & ((char)changeForegroundColor)));
+				changeForegroundColor = -1;
+			} else if(changeBackgroundColor > -1) {// Background coloring
+				color = (Byte) (color & 0x0F) | (((char)changeBackgroundColor)<<4);
+				changeBackgroundColor = -1;
 			}
+			current()->channel_table[fd]->content.bits.color = color;
+			changeColor = 0;	
 		}
 
-    y = j % 80;
-    if (j != 0 && j % 80 == 0) {
-        x++;
-    }
-		
-  }
+		int currPos = (int) current()->channel_table[fd]->content.bits.rwpointer;
+		if(buffer[i] == '['){//Escape Code
+			if((i+1) < nbytes && buffer[i+1] == '3' && (i+3) < nbytes && buffer[i+3] == 'm') {// Change Foreground Color
+				changeForegroundColor = (int) buffer[i+2];
+				changeColor = 1;
+				i += 3;
+			}else if((i+1) < nbytes && buffer[i+1] == '4' && (i+3) < nbytes && buffer[i+3] == 'm') {// Change Background Color
+				changeBackgroundColor = (int) buffer[i+2];
+				changeColor = 1;
+				i += 3;
+			}
 	
-	if (j > 1920)
-		return -EINVAL;
+			if((i+2) < nbytes && buffer[i+2] == ';' && (i+4) < nbytes && buffer[i+4] == 'f'){
+				int posx = (int) (buffer[i+1]-'0');
+				int posy = (int) (buffer[i+3]-'0');
+				if(posx >= 0 && posx < 25 && posy >=0 && posy < 80){
+					int changeCursorPos = posx * 80 + posy;
+					current()->channel_table[fd]->content.bits.rwpointer = changeCursorPos;
+				}
+				i += 4;
+			}else if((i+2) < nbytes && buffer[i+2] == ';' && (i+5) < nbytes && buffer[i+5] == 'f') {
+				int posx = (int) (buffer[i+1]-'0');
+				int posy = ((int) (buffer[i+3]-'0') * 10) + ((int) buffer[i+4]);
+				if(posx >= 0 && posx < 25 && posy >=0 && posy < 80){
+					int changeCursorPos = posx * 80 + posy;
+					current()->channel_table[fd]->content.bits.rwpointer = changeCursorPos;
+				}
+				i += 5;
+			}else if((i+3) < nbytes && buffer[i+3] == ';' && (i+5) < nbytes && buffer[i+5] == 'f') {
+				int posx = ((int) (buffer[i+1]-'0') * 10) + ((int) buffer[i+2]);
+				int posy = (int) (buffer[i+4]-'0');
+				if(posx >= 0 && posx < 25 && posy >=0 && posy < 80){
+					int changeCursorPos = posx * 80 + posy;
+					current()->channel_table[fd]->content.bits.rwpointer = changeCursorPos;
+				}
+				i += 5;
+			}else if((i+3) < nbytes && buffer[i+3] == ';' && (i+6) < nbytes && buffer[i+6] == 'f') {
+				int posx = ((int) (buffer[i+1]-'0') * 10) + ((int) buffer[i+2]);
+				int posy = ((int) (buffer[i+4]-'0') * 10) + ((int) buffer[i+5]);
+				if(posx >= 0 && posx < 25 && posy >=0 && posy < 80){
+					int changeCursorPos = posx * 80 + posy;
+					current()->channel_table[fd]->content.bits.rwpointer = changeCursorPos;
+				}
+				i += 6;
+			}
 
-  current()->channel_table[fd]->content.bits.rwpointer = ((y & 0x7F)<<5) | (x & 0x1F);
+		} else if(buffer[i] == '\177'){// Delete char
 
-	copy_data((void*)&buff, (void*)(current()->channel_table[fd]->logicpage<<12), nbytes*2);
+			Word w = ((Word) (color << 8)) | ((Word) ' ');
+			if(currPos != 0)
+				currPos =	currPos-1;
+			if((int)currPos % 2 == 0) {
+				currPos = (currPos/2);
+				screen[currPos] = (DWord) (screen[currPos] & 0xFFFF0000) | (DWord) ((DWord) w  & 0x0000FFFF);
+			}else if((int)currPos % 2 == 1){
+				currPos = ((currPos-1)/2);
+				screen[currPos] = (DWord) (screen[currPos] & 0x0000FFFF) | (DWord) ((DWord) (w<<16) & 0xFFFF0000);
+			}
+			current()->channel_table[fd]->content.bits.rwpointer -= 1;
 
-        
+		} else{
+			
+			Word w = ((Word) (color << 8)) | ((Word) buffer[i]);
+			if((int)currPos % 2 == 0) {
+				currPos = (currPos/2);
+				screen[currPos] = (DWord) (screen[currPos] & 0xFFFF0000) | (DWord) ((DWord) w  & 0x0000FFFF);
+			}else if((int)currPos % 2 == 1){
+				currPos = ((currPos-1)/2);
+				screen[currPos] = (DWord) (screen[currPos] & 0x0000FFFF) | (DWord) ((DWord) (w<<16) & 0xFFFF0000);
+			}
+			current()->channel_table[fd]->content.bits.rwpointer += 1;
+
+		}
+	
+	}
+	
+	//return bytes_left;
+
+
+
+
 	/*printc('\n',0x0F);
 	printc('A',0x01);	printc('A',0x02);	printc('A',0x03);	printc('A',0x04);	printc('A',0x05);	printc('A',0x06);	printc('A',0x07);	printc('A',0x08);	printc('A',0x09);	printc('A',0x0A);	printc('A',0x0B);
 	printc('A',0x0C);	printc('A',0x0D);	printc('A',0x0E);	printc('A',0x0F);

@@ -11,12 +11,12 @@ int __attribute__ ((__section__(".text.main")))
      /* __asm__ __volatile__ ("mov %0, %%cr3"::"r" (0) ); */
 
    // TEST 1 
-   /*
-	char *buff = "Muestra [47m[31mesto por\177 pan[30mtalla virtual\177\177\177\177\177\177\177"; 
+   
+	char *buff = "Muestra [47m[31mesto por\177 pan[30mtalla virtual[0;0f"; 
   write(0,buff,strlen(buff)); 
-	*buff = "\177";
-	write(0,buff,strlen(buff)); 
-  */
+	char *bufff = "Hola k tal";
+	write(0,bufff,strlen(bufff));
+  
  //TEST 2 
  /*
 	int fd = createScreen(); 
@@ -49,7 +49,7 @@ int __attribute__ ((__section__(".text.main")))
 
 //TEST 6 Debugueando fork
 
-int fd;
+/*int fd;
 char *bufw = "Muestra hijo"; 
 char *bufd = "Muestra padre"; 
 int pid = fork();
@@ -60,7 +60,7 @@ fork();
 else{
  int fd = createScreen(); 
  write(fd,bufd,strlen(bufd));
-}
+}*/
 //Aqui el fork peta
 
   //TEST 5 COmprobar que no crea más pantllas al superar el limite de pantallas en un proceso
