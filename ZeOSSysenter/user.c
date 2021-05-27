@@ -12,10 +12,10 @@ int __attribute__ ((__section__(".text.main")))
 
    // TEST 1 
    
-	char *buff = "Muestra [47m[31mesto por\177 pan[30mtalla virtual[0;0f"; 
+	/*char *buff = "Muestra [47m[31mesto por\177 pan[30mtalla virtual"; 
   write(0,buff,strlen(buff)); 
-	char *bufff = "Hola k tal";
-	write(0,bufff,strlen(bufff));
+	buff = "[1;0fHola k tal";
+	write(0,buff,strlen(buff));*/
   
  //TEST 2 
  /*
@@ -81,10 +81,10 @@ else{
   */
 
  //TEST 6 Comprobar que la pantalla virtual se muestra entera
- /*
-  char buff[80*24] = "Esto es una frase de prueba larga1 Esto es una frase de prueba larga2 Esto es una frase de prueba3 Esto es una frase de perueba larga4 ESto es una frase de peruba5 ESto es una frase de prueba6 Esto es una frase de prueba larga1 Esto es una frase de prueba larga2 Esto es una frase de prueba3 Esto es una frase de perueba larga4 ESto es una frase de peruba5 ESto es una frase de prueba6 Esto es una frase de prueba larga1 Esto es una frase de prueba larga2 Esto es una frase de prueba3 Esto es una frase de perueba larga4 ESto es una frase de peruba5 ESto es una frase de prueba6 Esto es una frase de prueba larga1 Esto es una frase de prueba larga2 Esto es una frase de prueba3 Esto es una frase de perueba larga4 ESto es una frase de peruba5 ESto es una frase de prueba6 Esto es una frase de prueba larga1 Esto es una frase de prueba larga2 Esto es una frase de prueba3 Esto es una frase de perueba larga4 ESto es una frase de peruba5 ESto es una frase de prueba6 Esto es una frase de prueba larga1 Esto es una frase de prueba larga2 Esto es una frase de prueba3 Esto es una frase de perueba larga4 ESto es una frase de peruba5 ESto es una frase de prueba6 fin una frase de prueba larga1 Esto es una frase de prueba larga2 Esto es una frase de prueba3 Esto es una frase de perueba larga4 ESto es una frase de peruba5 ESto es una frase de prueba6 Esto es una frase de prueba larga1 Esto es una frase de prueba larga2 Esto es una frase de prueba3 Esto es una frase de perueba larga4 ESto es una frase de peruba5 ESto es una frasedfghjkkkkkkkkk una frase de prueba larga2 Esto es una frase de prueba3 Esto es una frase de perueba larga4 ESto es una frase de peruba5 ESto es una frasedfghjkkkkkkkkk frase de prueba larga2 Esto es una frase de prueba3 Esto es una frase de perueba larga4 ESto es una frase de peruba5 ESto es una frasedfghjkkkkkkkkk"; 
+ 
+  char buff[80*24] = "Esto es una frase de prueba larga1 Esto es una frase de prueba larga2 Esto es una frase de prueba3 Esto es una frase de perueba larga4 ESto es una frase de peruba5 ESto es una frase de prueba6 Esto es una frase de prueba larga1 Esto es una frase de prueba larga2 Esto es una frase de prueba3 Esto es una frase de perueba larga4 ESto es una frase de peruba5 ESto es una frase de prueba6 Esto es una frase de prueba larga1 Esto es una frase de prueba larga2 Esto es una frase de prueba3 Esto es una frase de perueba larga4 ESto es una frase de peruba5 ESto es una frase de prueba6 Esto es una frase de prueba larga1 Esto es una frase de prueba larga2 Esto es una frase de prueba3 Esto es una frase de perueba larga4 ESto es una frase de peruba5 ESto es una frase de prueba6 Esto es una frase de prueba larga1 Esto es una frase de prueba larga2 Esto es una frase de prueba3 Esto es una frase de perueba larga4 ESto es una frase de peruba5 ESto es una frase de prueba6 Esto es una frase de prueba larga1 Esto es una frase de prueba larga2 Esto es una frase de prueba3 Esto es una frase de perueba larga4 ESto es una frase de peruba5 ESto es una frase de prueba6 fin una frase de prueba larga1 Esto es una frase de prueba larga2 Esto es una frase de prueba3 Esto es una frase de perueba larga4 ESto es una frase de peruba5 ESto es una frase de prueba6 Esto es una frase de prueba larga1 Esto es una frase de prueba larga2 Esto es una frase de prueba3 Esto es una frase de perueba larga4 ESto es una frase de peruba5 ESto es una frasedfghjkkkkkkkkk una frase de prueba larga2 Esto es una frase de prueba3 Esto es una frase de perueba larga4 ESto es una frase de peruba5 ESto es una frasedfghjkkkkkkkkk frase de prueba larga2 Esto es una frase de prueba3 Esto es una frase de perueba larga4 ESto es una frase de peruba5 ESto es una frasedfghjkkkkkkkkkESto es una frase de peruba5 ESto es una frasedfghjkkkkkkkkkfrasedfghjkkkkkkkkk"; 
   write(0,buff,strlen(buff));
-*/
+
 
 
   while(1) { }
