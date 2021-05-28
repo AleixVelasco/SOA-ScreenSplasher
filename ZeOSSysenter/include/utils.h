@@ -15,6 +15,6 @@ unsigned long get_ticks(void);
 
 void memset(void *s, unsigned char c, int size);
 
-void func(unsigned long val);
+void itoak(int a, char *b);
 
 #endif

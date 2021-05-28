@@ -7,10 +7,8 @@
 #include <segment.h>
 #include <hardware.h>
 #include <io.h>
-#include <utils.h>
-
 #include <sched.h>
-
+#include <utils.h>
 #include <zeos_interrupt.h>
 
 Gate idt[IDT_ENTRIES];
@@ -35,7 +33,6 @@ char char_map[] =
   '\0','\0'
 };
 
-
 #define rdtsc(low,high) \
         __asm__ __volatile__("rdtsc" : "=a" (low), "=d" (high))
 
@@ -57,18 +54,12 @@ int old_fps = 0;
 
 unsigned long long old_cicles = 0;
 unsigned long long new_cicles = 0;
-unsigned long long cicles = 0;
 
 void clock_routine()
 {
   //zeos_show_clock();
   zeos_ticks ++;
   unsigned long long val = get_val();
-  if(zeos_ticks == 1) old_cicles = val;
-  if(zeos_ticks == 2){
-   new_cicles = val;
-   cicles = new_cicles - old_cicles;
-  }
 
   if(zeos_ticks > 3){
   /* Pintamos identificador de la pantalla y el proceso actual */
@@ -76,8 +67,8 @@ void clock_routine()
   char idProces[5];
   char idPantalla[1];
 
-  itoa(current()->PID, idProces);
-  itoa(current()->foco, idPantalla);
+  itoak(current()->PID, idProces);
+  itoak(current()->foco, idPantalla);
   
   int pos = 0;
   char buffer[8] = "Screen:";
@@ -109,29 +100,16 @@ void clock_routine()
     pos++;
   }
   char fps_c[2];
-  itoa(old_fps,fps_c);
+  itoak(old_fps,fps_c);
   for(int i = 0; fps_c[i]; ++i){
     printc_xy(pos,0, fps_c[i],0x70);
     pos++;
   }
   if(old_fps > 9) pos++;
-  
-  //obtenemos segundos
-  
-  //Obtenemos con zeos_ticks si ha llegado a 18 ticks = 1 segundo
-  
-  
-  /*
-  printk("VALOR: ");
-  char buffg[10];
-  int f = new_cicles - old_cicles;
-  itoa(f, buffg);
-  printk(buffg);
-  */
 
   new_cicles = val;
   //cicles = 219700
-  if((new_cicles - old_cicles) >= cicles*18){
+  if((new_cicles - old_cicles) >= 219700*18){
    old_fps = new_fps;
    new_fps = 0;
    old_cicles = new_cicles;
@@ -143,7 +121,7 @@ void clock_routine()
   
   int x = 0, y = 1;
   DWord screen = (DWord)(current()->channel_table[current()->foco]->logicpage<<12);
-  for(DWord *i = screen ; i < screen + PAGE_SIZE; i++) {
+  for(DWord *i = (DWord*)screen; (int)i < screen + PAGE_SIZE; i++) {
 	DWord m = *i;
 	Byte bcolor1 = (Byte) (m>>8);
 	Byte bchar1 = (Byte) m;
