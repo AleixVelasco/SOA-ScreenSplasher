@@ -132,8 +132,8 @@ ENTRY(setFocus)
 	movl $27, %eax
 	movl 0x8(%ebp), %ebx;	//canal
 	call syscall_sysenter
-	popl %ebp
-	ret
+	popl %ebx
+	test %eax, %eax
 	js nok	// if (eax < 0) -->
 	popl %ebp
 	ret
