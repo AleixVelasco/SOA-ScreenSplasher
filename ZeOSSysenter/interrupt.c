@@ -60,16 +60,12 @@ void clock_routine()
   //zeos_show_clock();
   zeos_ticks ++;
   unsigned long long val = get_val();
-
   if(zeos_ticks > 3){
   /* Pintamos identificador de la pantalla y el proceso actual */
-  
   char idProces[5];
   char idPantalla[1];
-
   itoak(current()->PID, idProces);
   itoak(current()->foco, idPantalla);
-  
   int pos = 0;
   char buffer[8] = "Screen:";
   for(int i = 0; buffer[i]; ++i){
@@ -92,8 +88,8 @@ void clock_routine()
     pos++;
   }
 
-  //Mostramos buffers 
- 
+  //Mostramos FPS
+
   char buff_fps[8] = " | FPS:";
   for(int i = 0; buff_fps[i]; ++i){
     printc_xy(pos,0, buff_fps[i],0x70);
@@ -108,7 +104,6 @@ void clock_routine()
   if(old_fps > 9) pos++;
 
   new_cicles = val;
-  //cicles = 219700
   if((new_cicles - old_cicles) >= 219700*18){
    old_fps = new_fps;
    new_fps = 0;
@@ -127,10 +122,7 @@ void clock_routine()
 	Byte bchar1 = (Byte) m;
 	Byte bcolor2 = (Byte) (m>>24);
 	Byte bchar2 = (Byte) (m>>16);
-        
-	//if((y * 80 + x) == (int) current()->channel_table[current()->foco]->content.bits.rwpointer) {
-	//	bcolor1 = (bcolor1 & 0x7F) | 0x80;
-	//}
+
 	printc_xy(x, y, bchar1, bcolor1);
 
 	x++;
@@ -138,9 +130,6 @@ void clock_routine()
 		x = 0; 
 		y++;
 	}
-	//if((y * 80 + x) == (int) current()->channel_table[current()->foco]->content.bits.rwpointer) {
-	//	bcolor2 = (bcolor2 & 0x7F) | 0x80;
-	//}
 
 	printc_xy(x, y, bchar2, bcolor2);
 
@@ -151,7 +140,9 @@ void clock_routine()
 	}
    }
    new_fps++;
+   
   }
+  
   schedule();
   
 }

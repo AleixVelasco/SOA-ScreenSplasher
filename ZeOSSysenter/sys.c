@@ -175,14 +175,10 @@ int sys_fork(void)
 #define TAM_BUFFER 512
 
 int sys_write(int fd, char *buffer, int nbytes) {
-	char localbuffer [TAM_BUFFER];
-	int bytes_left;
 	int ret;
-	int escapeCode = 0, changeColor = 0, changeCursor = 0, delete = 0;
-	char code[5];
-	int pos = 0;
+	int changeColor = 0;
 
- 	int changeForegroundColor = -1, changeBackgroundColor = -1, changeCursorPos = -1;
+ 	int changeForegroundColor = -1, changeBackgroundColor = -1;
 
 	if ((ret = check_fd(fd, ESCRIPTURA)))
 		return ret;
@@ -193,16 +189,14 @@ int sys_write(int fd, char *buffer, int nbytes) {
 	
 
 	Byte color = (Byte) current()->channel_table[fd]->content.bits.color;
-	int positionCursor = (int) current()->channel_table[fd]->content.bits.rwpointer;
-
-	DWord *screen = (DWord)(current()->channel_table[fd]->logicpage<<12);
+	DWord *screen = (DWord*)(current()->channel_table[fd]->logicpage<<12);
 
 	/*if((screen + (DWord) (positionCursor/2)) > (screen + PAGE_SIZE)){
 		bytes_left = ((screen + (DWord) (positionCursor/2)) - (screen + PAGE_SIZE))*2;
 	}*/
 	//int currPos = (int) current()->channel_table[fd]->content.bits.rwpointer;
 
-	DWord checkPos = (DWord) current()->channel_table[fd]->content.bits.rwpointer;
+
 	for(int i = 0; i<nbytes; ++i){
 
 		// Change Color
@@ -438,7 +432,7 @@ int sys_getfocus(int focus)
 }
 
 int sys_setFocus(int canal)
-{
+{       
 	struct task_struct *p = current();
 	if(canal >= 0 && canal <10 && canal < p->screens) {
 		p->foco = canal;
