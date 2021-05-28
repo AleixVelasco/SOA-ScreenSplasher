@@ -123,12 +123,8 @@ int sys_fork(void)
     set_ss_pag(process_PT, PAG_LOG_INIT_CODE+pag, get_frame(parent_PT, PAG_LOG_INIT_CODE+pag));
   }
 
-  int screens = current()->screens;
+  int screens = current()->screens+1;
   int PAG_LOG_INIT_SCREEN = PAG_LOG_INIT_DATA + NUM_PAG_DATA;
-  for (pag=0; pag<PAG_LOG_INIT_SCREEN+screens; pag++)
-  {
-    set_ss_screen_pag(process_PT, PAG_LOG_INIT_SCREEN + pag, get_frame(parent_PT, PAG_LOG_INIT_SCREEN + pag));
-  }
 
   /* Copy parent's DATA to child. We will use TOTAL_PAGES-1 as a temp logical page to map to */
   for (pag=NUM_PAG_KERNEL+NUM_PAG_CODE; pag<NUM_PAG_KERNEL+NUM_PAG_CODE+NUM_PAG_DATA; pag++)
@@ -137,6 +133,12 @@ int sys_fork(void)
     set_ss_pag(parent_PT, pag+NUM_PAG_DATA+screens, get_frame(process_PT, pag));
     copy_data((void*)(pag<<12), (void*)((pag+NUM_PAG_DATA+screens)<<12), PAGE_SIZE);
     del_ss_pag(parent_PT, pag+NUM_PAG_DATA+screens);
+  }
+
+ 
+  for (pag=0; pag<PAG_LOG_INIT_SCREEN+screens-1; pag++)
+  {
+    set_ss_screen_pag(process_PT, PAG_LOG_INIT_SCREEN + pag, get_frame(parent_PT, PAG_LOG_INIT_SCREEN + pag));
   }
 
 

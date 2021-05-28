@@ -1,6 +1,7 @@
 /*
  * interrupt.c -
  */
+
 #include <types.h>
 #include <interrupt.h>
 #include <segment.h>
@@ -34,54 +35,42 @@ char char_map[] =
   '\0','\0'
 };
 
+
+#define rdtsc(low,high) \
+        __asm__ __volatile__("rdtsc" : "=a" (low), "=d" (high))
+
+unsigned long long get_val(void) {
+        unsigned long eax;
+        unsigned long edx;
+        unsigned long long ticks;
+
+        rdtsc(eax,edx);
+
+        ticks=((unsigned long long) edx << 32) + eax;
+
+        return ticks;
+}
+
 int zeos_ticks = 0;
 int new_fps = 0;
 int old_fps = 0;
 
-void fps_routine(){
-
-}
+unsigned long long old_cicles = 0;
+unsigned long long new_cicles = 0;
+unsigned long long cicles = 0;
 
 void clock_routine()
 {
   //zeos_show_clock();
   zeos_ticks ++;
+  unsigned long long val = get_val();
+  if(zeos_ticks == 1) old_cicles = val;
+  if(zeos_ticks == 2){
+   new_cicles = val;
+   cicles = new_cicles - old_cicles;
+  }
 
   if(zeos_ticks > 3){
-  /* Prueba  */
-  /*
-   //De buffer->pagina de pantalla (color+caracter)
-   char buffp[40] = "Hello I am a multicolor operating system";
-   Word buf[40];
-  
-  for(int i = 0; i<40; ++i){ 
-   Byte col = i%4+1; //Colores random excepto el negro
-   char caracter = buffp[i]; 
-    
-   Word color_w = 0xFF00 & (col<<8);
-   Word total = (Word) (caracter & 0x00FF) | color_w;
-   
-   buf[i] = total;
-  }
-
-   copy_data((void*)&buf, (void*)(current()->channel_table[current()->foco]->logicpage<<12), 80); //Copy data va por bytes al ser un word se ha de pasar el doble
-
-  //De pagina de pantalla -> buffer
-  Word bufft[40]; 
-  copy_data((void*)(current()->channel_table[current()->foco]->logicpage<<12), (void*)&bufft, 80);
-
-  int pos = 0;
-  for(int i = 0; i < 40; i++){
-
-     Byte col = bufft[i]>>8;
-     char caracter = bufft[i];
-
-     printc_xy(i, 0, caracter, col);
-     ++pos;
-  }
-   */
-  /* Prueba */
-
   /* Pintamos identificador de la pantalla y el proceso actual */
   
   char idProces[5];
@@ -89,7 +78,7 @@ void clock_routine()
 
   itoa(current()->PID, idProces);
   itoa(current()->foco, idPantalla);
- 
+  
   int pos = 0;
   char buffer[8] = "Screen:";
   for(int i = 0; buffer[i]; ++i){
@@ -131,106 +120,60 @@ void clock_routine()
   
   //Obtenemos con zeos_ticks si ha llegado a 18 ticks = 1 segundo
   
-  if(zeos_ticks%18 == 0 && zeos_ticks!=0){
+  
+  /*
+  printk("VALOR: ");
+  char buffg[10];
+  int f = new_cicles - old_cicles;
+  itoa(f, buffg);
+  printk(buffg);
+  */
+
+  new_cicles = val;
+  //cicles = 219700
+  if((new_cicles - old_cicles) >= cicles*18){
    old_fps = new_fps;
    new_fps = 0;
+   old_cicles = new_cicles;
   }
   
   for(int i = pos; i < 80-pos; i++){
     printc_xy(i,0,' ',0x02);
   }
   
-   /* Prueba */
-   /*
-   //De buffer->pagina de pantalla (color+caracter)
+  int x = 0, y = 1;
+  DWord screen = (DWord)(current()->channel_table[current()->foco]->logicpage<<12);
+  for(DWord *i = screen ; i < screen + PAGE_SIZE; i++) {
+	DWord m = *i;
+	Byte bcolor1 = (Byte) (m>>8);
+	Byte bchar1 = (Byte) m;
+	Byte bcolor2 = (Byte) (m>>24);
+	Byte bchar2 = (Byte) (m>>16);
+        
+	//if((y * 80 + x) == (int) current()->channel_table[current()->foco]->content.bits.rwpointer) {
+	//	bcolor1 = (bcolor1 & 0x7F) | 0x80;
+	//}
+	printc_xy(x, y, bchar1, bcolor1);
 
-   char buffp[500] = "Hello I am a multicolor operating system Hello I am a multicolor operating system Hello I am a multicolor operating system Hello I am a multicolor operating system Hello I am a multicolor operating system";
-   Word buf[500];
-  
-  for(int i = 0; i<500; ++i){ 
-   Byte col = i%4+1; //Colores random excepto el negro
-   char caracter = buffp[i]; 
-    
-   Word color_w = 0xFF00 & (col<<8);
-   Word total = (Word) (caracter & 0x00FF) | color_w;
-   
-   buf[i] = total;
+	x++;
+	if(x == 80 && y < 24){
+		x = 0; 
+		y++;
+	}
+	//if((y * 80 + x) == (int) current()->channel_table[current()->foco]->content.bits.rwpointer) {
+	//	bcolor2 = (bcolor2 & 0x7F) | 0x80;
+	//}
+
+	printc_xy(x, y, bchar2, bcolor2);
+
+	x++;
+	if(x == 80 && y < 24){
+		x = 0; 
+		y++;
+	}
+   }
+   new_fps++;
   }
-  copy_data((void*)&buf, (void*)(current()->channel_table[current()->foco]->logicpage<<12), 1000); //Copy data va por bytes al ser un word se ha de pasar el doble
-  current()->channel_table[current()->foco]->content.bits.rwpointer = 0x005;
-  
-   */
-   /* Prueba */
-
-   /* Copiamos contenido extraido de la tabla de pantallas *
-  //Coger contenido del foco actual y pasarlo a un buffer
-  //Caracteres totales = filas_rwpointer * columnas_totales + columnas_rwpointer
-  
-  int columnas_rwpointer = (int)((current()->channel_table[current()->foco]->content.bits.rwpointer)>>5);
-  int filas_rwpointer = (int)((current()->channel_table[current()->foco]->content.bits.rwpointer)&0x1F);
-  
-  int caracteres_totales = filas_rwpointer * 80 + columnas_rwpointer;
-  Word total_c[caracteres_totales];
-  copy_data((void*)((int)(current()->channel_table[current()->foco]->logicpage)<<12), total_c, caracteres_totales*2);
-  //Pintamos contenido
-  
-  int y = 1;
-  int salt = 0;
-  for(int i = 0; i < 80*24; i++){
-     Byte col = total_c[i]>>8;
-     char caracter = total_c[i];
-     if(i<caracteres_totales){
-       col = total_c[i]>>8;
-       caracter = total_c[i];
-     }
-     else{
-       col = 0x02;
-       caracter = ' ';
-     }
-     if(salt == 80){
-        y++;
-        salt = 0;
-     }
-     printc_xy(i%80, y%25, caracter, col);
-     salt++;
-  }
-  new_fps++;*/
-  
-		int x = 0, y = 1;
-		DWord screen = (DWord)(current()->channel_table[current()->foco]->logicpage<<12);
-		for(DWord *i = screen ;i < screen + PAGE_SIZE;i++) {
-			DWord m = *i;
-			Byte bcolor1 = (Byte) (m>>8);
-			Byte bchar1 = (Byte) m;
-			Byte bcolor2 = (Byte) (m>>24);
-			Byte bchar2 = (Byte) (m>>16);
-
-			/*if((y * 80 + x) == (int) current()->channel_table[current()->foco]->content.bits.rwpointer) {
-				bcolor1 = (bcolor1 & 0x7F) | 0x80;
-			}*/
-
-			printc_xy(x, y, bchar1, bcolor1);
-
-			x++;
-			if(x == 80 && y < 24){
-				x = 0; 
-				y++;
-			}
-
-			/*if((y * 80 + x) == (int) current()->channel_table[current()->foco]->content.bits.rwpointer) {
-				bcolor2 = (bcolor2 & 0x7F) | 0x80;
-			}*/
-
-	 		printc_xy(x, y, bchar2, bcolor2);
-
-			x++;
-			if(x == 80 && y < 24){
-				x = 0; 
-				y++;
-			}
-		}
-  }
-  
   schedule();
   
 }

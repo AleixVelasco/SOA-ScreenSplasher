@@ -153,4 +153,7 @@ int strlen(char *a)
   
   return i;
 }
+void func(unsigned long val){
+   unsigned long long vol = val;
+}
 
